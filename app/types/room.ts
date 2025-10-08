@@ -25,7 +25,8 @@ export interface Capture {
   id: number;
   value: string;
   description: string;
-  createdAt: string;
+  createdAt?: string;
+  dateCaptured?: string;
 }
 
 // Last Capture by Type
@@ -78,4 +79,25 @@ export interface HydraCollection<T> {
 export interface ApiError {
   message: string;
   status?: number;
+}
+
+// Room Update Payload
+export interface RoomUpdatePayload {
+  name: string;
+  description: string;
+  captureTypes: string[];
+}
+
+// API Capture Type
+export interface ApiCaptureType {
+  '@id': string;
+  '@type': string;
+  id: number;
+  name: string;
+  description: string;
+}
+
+// API Room with Capture Types (for editing)
+export interface ApiRoomWithCaptureTypes extends ApiRoom {
+  captureTypes: string[];
 }

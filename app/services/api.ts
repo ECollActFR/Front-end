@@ -29,7 +29,8 @@ class ApiService {
         ...options,
         signal: controller.signal,
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/ld+json',
+          'Accept': 'application/ld+json',
           ...options.headers,
         },
       });
@@ -80,6 +81,31 @@ class ApiService {
       body: JSON.stringify(data),
     });
     return response.json();
+  }
+
+  /**
+   * PUT request
+   */
+  async put<T>(endpoint: string, data: any): Promise<T> {
+    const url = `${this.baseURL}${endpoint}`;
+    const response = await this.fetchWithTimeout(url, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+    return response.json();
+  }
+
+  /**
+   * DELETE request
+   */
+  async delete<T>(endpoint: string): Promise<T> {
+    const url = `${this.baseURL}${endpoint}`;
+    const response = await this.fetchWithTimeout(url, {
+      method: 'DELETE',
+    });
+    // DELETE might return empty response
+    const text = await response.text();
+    return text ? JSON.parse(text) : ({} as T);
   }
 }
 

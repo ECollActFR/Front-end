@@ -1,11 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity, useWindowDimensions } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { LoadingSpinner, Button } from '@/components/atoms';
-import { ErrorMessage, DetailRow, AmenityChip } from '@/components/molecules';
-import { SensorCard } from '@/components/organisms';
+import { ErrorMessage, DetailRow, AmenityChip, ConfirmDeleteModal } from '@/components/molecules';
+import { SensorCard, RoomEditModal } from '@/components/organisms';
 import { useRoomDetail } from '@/hooks/useRoomDetail';
 import Icon from '@/components/atoms/Icon';
+import { IconSymbol } from '@/components/ui/icon-symbol';
+import { roomService } from '@/services/roomService';
 
 // Breakpoint for desktop layout
 const DESKTOP_BREAKPOINT = 768;
@@ -16,6 +18,9 @@ export default function RoomDetailScreen() {
   const { width } = useWindowDimensions();
   const roomId = parseInt(id || '0', 10);
   const { roomDetail, isLoading, error, refetch } = useRoomDetail(roomId);
+  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const isDesktop = width >= DESKTOP_BREAKPOINT;
 
@@ -54,14 +59,57 @@ export default function RoomDetailScreen() {
     // TODO: Add booking logic
   };
 
+  const handleEditSave = () => {
+    refetch();
+  };
+
+  const handleDeleteClick = () => {
+    setIsDeleteModalVisible(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    try {
+      setIsDeleting(true);
+      await roomService.deleteRoom(roomId);
+      setIsDeleteModalVisible(false);
+      // Navigate back and force a refresh by replacing the route
+      router.replace('/');
+    } catch (error: any) {
+      console.error('Error deleting room:', error);
+      setIsDeleting(false);
+      setIsDeleteModalVisible(false);
+
+      // Check if it's a constraint violation error
+      if (error?.message?.includes('constraint') || error?.message?.includes('foreign key')) {
+        alert('Impossible de supprimer cette salle car elle contient des données de capteurs. Veuillez d\'abord supprimer les données associées.');
+      } else {
+        alert('Une erreur est survenue lors de la suppression de la salle.');
+      }
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setIsDeleteModalVisible(false);
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Room Header Image/Color */}
         <View style={[styles.headerImage, { backgroundColor: roomDetail.color }]}>
-          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-            <Icon name="chevron-right" size={24} color="#FFFFFF" style={{ transform: [{ rotate: '180deg' }] }} />
-          </TouchableOpacity>
+          <View style={styles.headerButtons}>
+            <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+              <Icon name="chevron-right" size={24} color="#FFFFFF" style={{ transform: [{ rotate: '180deg' }] }} />
+            </TouchableOpacity>
+            <View style={styles.headerRightButtons}>
+              <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteClick}>
+                <IconSymbol name="trash" size={20} color="#EF4444" />
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.editButton} onPress={() => setIsEditModalVisible(true)}>
+                <Text style={styles.editButtonText}>Modifier</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
           {!roomDetail.available && (
             <View style={styles.unavailableBadge}>
               <Text style={styles.unavailableText}>Occupée</Text>
@@ -133,6 +181,23 @@ export default function RoomDetailScreen() {
           <Button title="Réserver cette salle" onPress={handleBooking} />
         </View>
       )}
+
+      {/* Edit Modal */}
+      <RoomEditModal
+        visible={isEditModalVisible}
+        roomId={roomId}
+        onClose={() => setIsEditModalVisible(false)}
+        onSave={handleEditSave}
+      />
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmDeleteModal
+        visible={isDeleteModalVisible}
+        roomName={roomDetail?.name || ''}
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+        isDeleting={isDeleting}
+      />
     </SafeAreaView>
   );
 }
@@ -147,16 +212,46 @@ const styles = StyleSheet.create({
     width: '100%',
     position: 'relative',
   },
-  backButton: {
+  headerButtons: {
     position: 'absolute',
     top: 16,
     left: 16,
+    right: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  backButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
     backgroundColor: 'rgba(0, 0, 0, 0.3)',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  headerRightButtons: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  deleteButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  editButton: {
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
+    justifyContent: 'center',
+  },
+  editButtonText: {
+    color: '#7FB068',
+    fontSize: 14,
+    fontWeight: '600',
   },
   unavailableBadge: {
     position: 'absolute',

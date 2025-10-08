@@ -8,11 +8,26 @@ interface SensorCardProps {
 
 // Helper to format date
 const formatDate = (dateString: string): string => {
-  const date = new Date(dateString);
+  // Remove timezone offset and treat as local time
+  // API sends "2025-10-08T14:17:15+02:00" but the time is actually in UTC
+  // So we strip the timezone and parse as local
+  const dateWithoutTz = dateString.replace(/[+-]\d{2}:\d{2}$/, '');
+  const date = new Date(dateWithoutTz);
+
+  // Check if date is valid
+  if (isNaN(date.getTime())) {
+    return 'Date invalide';
+  }
+
+  // Get current time in local timezone
   const now = new Date();
+
+  // Calculate difference in milliseconds
   const diffMs = now.getTime() - date.getTime();
   const diffMins = Math.floor(diffMs / 60000);
 
+  // Handle negative differences (future dates)
+  if (diffMins < 0) return 'Dans le futur';
   if (diffMins < 1) return 'À l\'instant';
   if (diffMins < 60) return `Il y a ${diffMins} min`;
   if (diffMins < 1440) return `Il y a ${Math.floor(diffMins / 60)} h`;
@@ -43,7 +58,24 @@ export default function SensorCard({ captureData }: SensorCardProps) {
   const { type, capture } = captureData;
   const unit = getUnit(type.description);
   const icon = getIcon(type.name);
-  const timestamp = formatDate(capture.createdAt);
+
+  // Use dateCaptured if available, fallback to createdAt
+  const dateString = capture.dateCaptured || capture.createdAt || '';
+
+  // API sends time in UTC but incorrectly labels it with +02:00
+  // Strip the incorrect timezone and add 'Z' to parse as UTC
+  const dateWithoutTz = dateString.replace(/[+-]\d{2}:\d{2}$/, '');
+  const utcDateString = dateWithoutTz + 'Z';
+
+  const date = new Date(utcDateString);
+
+  // For relative time, pass the UTC string
+  const relativeTime = formatDate(utcDateString);
+
+  const actualTime = date.toLocaleTimeString('fr-FR', {
+    hour: '2-digit',
+    minute: '2-digit'
+  });
 
   return (
     <View style={styles.card}>
@@ -51,7 +83,7 @@ export default function SensorCard({ captureData }: SensorCardProps) {
         <Text style={styles.icon}>{icon}</Text>
         <View style={styles.headerText}>
           <Text style={styles.description}>{capture.description}</Text>
-          <Text style={styles.timestamp}>{timestamp}</Text>
+          <Text style={styles.timestamp}>{actualTime} • {relativeTime}</Text>
         </View>
       </View>
       <View style={styles.valueContainer}>

@@ -10,4 +10,8 @@ export const API_CONFIG = {
 export const ENDPOINTS = {
   ROOMS: '/rooms',
   ROOM_DETAIL: (roomId: number) => `/rooms/${roomId}/last`,
+  ROOM: (roomId: number) => `/rooms/${roomId}`,
+  ROOM_UPDATE: (roomId: number) => `/rooms/${roomId}`,
+  ROOM_DELETE: (roomId: number) => `/rooms/${roomId}`,
+  CAPTURE_TYPES: '/capture_types',
 } as const;
