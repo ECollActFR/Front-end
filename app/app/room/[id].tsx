@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity, useWindowDimensions } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LoadingSpinner, Button } from '@/components/atoms';
 import { ErrorMessage, DetailRow, AmenityChip, ConfirmDeleteModal } from '@/components/molecules';
 import { SensorCard, RoomEditModal } from '@/components/organisms';
@@ -16,6 +17,7 @@ export default function RoomDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { width } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
   const roomId = parseInt(id || '0', 10);
   const { roomDetail, isLoading, error, refetch } = useRoomDetail(roomId);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
@@ -97,7 +99,7 @@ export default function RoomDetailScreen() {
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Room Header Image/Color */}
         <View style={[styles.headerImage, { backgroundColor: roomDetail.color }]}>
-          <View style={styles.headerButtons}>
+          <View style={[styles.headerButtons, { top: insets.top + 16 }]}>
             <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
               <Icon name="chevron-right" size={24} color="#FFFFFF" style={{ transform: [{ rotate: '180deg' }] }} />
             </TouchableOpacity>

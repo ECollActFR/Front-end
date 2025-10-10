@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Modal, TextInput, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { roomService } from '@/services/roomService';
 import { ApiCaptureType } from '@/types/room';
 
@@ -11,6 +12,7 @@ interface RoomEditModalProps {
 }
 
 export default function RoomEditModal({ visible, roomId, onClose, onSave }: RoomEditModalProps) {
+  const insets = useSafeAreaInsets();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [selectedCaptureTypes, setSelectedCaptureTypes] = useState<string[]>([]);
@@ -78,7 +80,7 @@ export default function RoomEditModal({ visible, roomId, onClose, onSave }: Room
       onRequestClose={onClose}
     >
       <View style={styles.container}>
-        <View style={styles.header}>
+        <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
           <TouchableOpacity onPress={onClose}>
             <Text style={styles.cancelButton}>Annuler</Text>
           </TouchableOpacity>
@@ -157,7 +159,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingBottom: 16,
     backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
     borderBottomColor: '#E5E7EB',
