@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity, use
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LoadingSpinner, Button } from '@/components/atoms';
-import { ErrorMessage, DetailRow, AmenityChip, ConfirmDeleteModal } from '@/components/molecules';
+import { ErrorMessage, AmenityChip, ConfirmDeleteModal, EquipmentItem } from '@/components/molecules';
 import { SensorCard, RoomEditModal } from '@/components/organisms';
 import { useRoomDetail } from '@/hooks/useRoomDetail';
 import Icon from '@/components/atoms/Icon';
@@ -147,10 +147,22 @@ export default function RoomDetailScreen() {
             </View>
           )}
 
+          {/* Equipment Section */}
+          {roomDetail.equipment && roomDetail.equipment.length > 0 && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Équipements</Text>
+              <View>
+                {roomDetail.equipment.map((equipment) => (
+                  <EquipmentItem key={equipment.id} equipment={equipment} />
+                ))}
+              </View>
+            </View>
+          )}
+
           {/* Amenities Section */}
           {roomDetail.amenities.length > 0 && (
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Équipements</Text>
+              <Text style={styles.sectionTitle}>Commodités</Text>
               <View style={styles.amenitiesContainer}>
                 {roomDetail.amenities.map((amenity, index) => (
                   <AmenityChip key={`${amenity}-${index}`} type={amenity} />

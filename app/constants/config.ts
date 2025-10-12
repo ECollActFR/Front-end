@@ -3,7 +3,7 @@
  */
 
 export const API_CONFIG = {
-  BASE_URL: 'http://192.168.1.90:8000/api',
+  BASE_URL: 'https://api.climesense.fr/api',
   TIMEOUT: 10000, // 10 seconds
 } as const;
 

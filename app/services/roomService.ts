@@ -44,24 +44,22 @@ export const roomService = {
         throw new Error('Invalid API response format');
       }
 
-      // Get base room info (we need to find it in the rooms list first to get UI enhancements)
-      // For now, we'll map it with a default index
-      const baseRoom = mapApiRoomToRoom(
-        {
-          '@id': `/api/rooms/${response.data.id}`,
-          '@type': 'Room',
-          id: response.data.id,
-          name: response.data.name,
-          description: response.data.description,
-        },
-        0
-      );
+      // Fetch the full room data to get equipment and other details
+      const roomData = await apiService.get<ApiRoom>(ENDPOINTS.ROOM(roomId));
+
+      // Map the room with equipment
+      const baseRoom = mapApiRoomToRoom(roomData, 0);
 
       // Combine with sensor data
       const roomDetail: RoomDetail = {
         ...baseRoom,
         lastCapturesByType: response.data.lastCapturesByType || [],
-        createdAt: response.data.createdAt,
+        captureTypes: roomData.captureTypes?.map(ct => ({
+          id: ct.id,
+          name: ct.name,
+          description: ct.description,
+        })),
+        acquisitionSystems: roomData.acquisitionSystems,
       };
 
       return roomDetail;
@@ -76,13 +74,19 @@ export const roomService = {
    */
   async getRoom(roomId: number): Promise<ApiRoomWithCaptureTypes> {
     try {
-      const response = await apiService.get<ApiRoomWithCaptureTypes>(ENDPOINTS.ROOM(roomId));
+      const response = await apiService.get<ApiRoom>(ENDPOINTS.ROOM(roomId));
 
       if (!response) {
         throw new Error('Invalid API response format');
       }
 
-      return response;
+      // Transform captureTypes from full objects to just IDs for editing
+      const captureTypeIds = response.captureTypes?.map(ct => ct['@id']) || [];
+
+      return {
+        ...response,
+        captureTypes: captureTypeIds,
+      };
     } catch (error) {
       console.error('Error fetching room:', error);
       throw error;

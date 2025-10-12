@@ -4,8 +4,25 @@
 
 export type Amenity = 'wifi' | 'monitor' | 'coffee';
 
-// API Response Room (from backend)
-export interface ApiRoom {
+// API Equipment
+export interface ApiEquipment {
+  '@id': string;
+  '@type': string;
+  id: number;
+  name: string;
+  capacity: number;
+}
+
+// API Acquisition System
+export interface ApiAcquisitionSystem {
+  '@id': string;
+  '@type': string;
+  id: number;
+  name: string;
+}
+
+// API Capture Type
+export interface ApiCaptureType {
   '@id': string;
   '@type': string;
   id: number;
@@ -13,7 +30,20 @@ export interface ApiRoom {
   description: string;
 }
 
-// Capture Type
+// API Response Room (from backend)
+export interface ApiRoom {
+  '@id': string;
+  '@type': string;
+  id: number;
+  name: string;
+  description: string;
+  captureTypes: ApiCaptureType[];
+  createdAt: string;
+  acquisitionSystems: ApiAcquisitionSystem[];
+  equipment: ApiEquipment[];
+}
+
+// Capture Type (UI simplified version)
 export interface CaptureType {
   id: number;
   name: string;
@@ -47,6 +77,13 @@ export interface RoomDetailResponse {
   };
 }
 
+// Equipment (UI simplified version)
+export interface Equipment {
+  id: number;
+  name: string;
+  capacity: number;
+}
+
 // UI Room (enhanced with UI-specific fields)
 export interface Room {
   id: number;
@@ -55,12 +92,15 @@ export interface Room {
   amenities: Amenity[];
   color: string;
   description?: string;
+  equipment?: Equipment[];
+  createdAt?: string;
 }
 
 // Room Detail with sensor data
 export interface RoomDetail extends Room {
   lastCapturesByType: LastCaptureByType[];
-  createdAt?: string;
+  captureTypes?: CaptureType[];
+  acquisitionSystems?: ApiAcquisitionSystem[];
 }
 
 // Hydra Collection Response
@@ -88,16 +128,15 @@ export interface RoomUpdatePayload {
   captureTypes: string[];
 }
 
-// API Capture Type
-export interface ApiCaptureType {
+// API Room with Capture Types (for editing)
+export interface ApiRoomWithCaptureTypes {
   '@id': string;
   '@type': string;
   id: number;
   name: string;
   description: string;
-}
-
-// API Room with Capture Types (for editing)
-export interface ApiRoomWithCaptureTypes extends ApiRoom {
-  captureTypes: string[];
+  captureTypes: string[] | ApiCaptureType[];
+  createdAt?: string;
+  equipment?: ApiEquipment[];
+  acquisitionSystems?: ApiAcquisitionSystem[];
 }

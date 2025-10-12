@@ -27,7 +27,7 @@ export default function ConfirmDeleteModal({
         <View style={styles.modal}>
           <Text style={styles.title}>Supprimer la salle</Text>
           <Text style={styles.message}>
-            Êtes-vous sûr de vouloir supprimer "{roomName}" ?
+            Êtes-vous sûr de vouloir supprimer &ldquo;{roomName}&rdquo; ?
           </Text>
           <Text style={styles.warning}>
             Cette action est irréversible.

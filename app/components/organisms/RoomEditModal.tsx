@@ -24,6 +24,7 @@ export default function RoomEditModal({ visible, roomId, onClose, onSave }: Room
     if (visible) {
       loadData();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible, roomId]);
 
   const loadData = async () => {
