@@ -1,206 +1,50 @@
-# Neutria - Front-end
+# Welcome to your Expo app 👋
 
-A cross-platform mobile and web application built with Expo and React Native, featuring room management functionality with create, edit, and delete capabilities.
+This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
-## Features
+## Get started
 
-- Cross-platform support (iOS, Android, Web)
-- File-based routing with Expo Router
-- Room management (create, edit, delete)
-- Dark mode / Light mode theming
-- Modern UI with React Navigation 7
-- Smooth animations with Reanimated
+1. Install dependencies
 
-## Tech Stack
+   ```bash
+   npm install
+   ```
 
-- **Framework**: React Native 0.81.4 with React 19.1.0
-- **Platform**: Expo SDK ~54.0.12
-- **Routing**: Expo Router ~6.0.10 (file-based routing)
-- **Navigation**: React Navigation 7 (bottom tabs, native stack)
-- **Animations**: React Native Reanimated ~4.1.1
-- **Gestures**: React Native Gesture Handler ~2.28.0
-- **Language**: TypeScript 5.9.2
+2. Start the app
 
-## Prerequisites
+   ```bash
+   npx expo start
+   ```
 
-- Node.js (LTS version recommended)
-- npm or yarn
-- For iOS development: macOS with Xcode
-- For Android development: Android Studio with Android SDK
+In the output, you'll find options to open the app in a
 
-## Getting Started
+- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
+- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
+- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
+- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
 
-### Installation
+You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
 
-1. Clone the repository:
+## Get a fresh project
+
+When you're ready, run:
+
 ```bash
-git clone <repository-url>
-cd Front-end
+npm run reset-project
 ```
 
-2. Navigate to the app directory:
-```bash
-cd app
-```
+This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
 
-3. Install dependencies:
-```bash
-npm install
-```
+## Learn more
 
-### Running the Application
+To learn more about developing your project with Expo, look at the following resources:
 
-Start the Expo development server:
-```bash
-npm start
-# or
-npx expo start
-```
+- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
+- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
 
-This will open the Expo DevTools in your browser. From there, you can:
+## Join the community
 
-#### Run on Web
-```bash
-npm run web
-```
-Access the web app at `http://localhost:8081`
+Join our community of developers creating universal apps.
 
-#### Run on iOS Simulator
-```bash
-npm run ios
-```
-Requires macOS and Xcode installed.
-
-#### Run on Android Emulator
-```bash
-npm run android
-```
-Requires Android Studio and an Android emulator configured.
-
-#### Run on Physical Device
-Scan the QR code shown in the terminal with:
-- **iOS**: Camera app or Expo Go app
-- **Android**: Expo Go app
-
-## Project Structure
-
-```
-app/
-├── app/                      # Application routes (file-based routing)
-│   ├── (tabs)/              # Tab-based navigation group
-│   │   ├── _layout.tsx      # Tab bar layout
-│   │   ├── index.tsx        # Home screen
-│   │   └── explore.tsx      # Explore screen
-│   ├── _layout.tsx          # Root layout
-│   └── modal.tsx            # Modal screen
-├── components/              # Reusable components
-│   ├── ui/                  # UI primitives
-│   │   ├── collapsible.tsx
-│   │   └── icon-symbol.ios.tsx
-│   ├── external-link.tsx
-│   ├── haptic-tab.tsx
-│   ├── parallax-scroll-view.tsx
-│   ├── themed-text.tsx
-│   └── themed-view.tsx
-├── constants/               # App constants and theme
-│   └── theme.ts
-├── hooks/                   # Custom React hooks
-│   ├── use-color-scheme.ts
-│   └── use-theme-color.ts
-└── scripts/                 # Build and utility scripts
-```
-
-## Available Scripts
-
-| Command | Description |
-|---------|-------------|
-| `npm start` | Start the Expo development server |
-| `npm run web` | Run the app in web browser |
-| `npm run ios` | Run the app on iOS simulator |
-| `npm run android` | Run the app on Android emulator |
-| `npm run lint` | Run ESLint to check code quality |
-| `npm run reset-project` | Reset project structure (move starter code to app-example) |
-
-## Architecture
-
-### Routing
-The app uses Expo Router for file-based routing. Routes are automatically generated based on the file structure in the `app/` directory:
-- Files become routes
-- Folders with parentheses like `(tabs)` are layout groups
-- `_layout.tsx` files define layout wrappers
-
-### Theming
-- Supports light and dark modes
-- Theme defined in `constants/theme.ts`
-- Uses `@react-navigation/native` theme provider
-- Custom hooks (`use-color-scheme`, `use-theme-color`) for theme access
-
-### Path Aliases
-The project uses `@/*` as an import alias for cleaner imports:
-```typescript
-import { Colors } from '@/constants/theme';
-import { ThemedText } from '@/components/themed-text';
-```
-
-### Platform-Specific Code
-Use file extensions for platform-specific implementations:
-- `.ios.tsx` - iOS-specific
-- `.android.tsx` - Android-specific
-- `.web.tsx` - Web-specific
-- `.tsx` - Default for all platforms
-
-## Development Guidelines
-
-### React Native Compatibility
-- Do not use web-only libraries (Radix UI, Headless UI, etc.)
-- Use React Native's built-in `Modal` component for dialogs
-- Always verify package compatibility with React Native before installing
-
-### Code Style
-- Run `npm run lint` before committing
-- Follow TypeScript best practices
-- Use the `@/` path alias for imports
-
-## Recent Updates
-
-- Fixed notification bar on room detail screen for delete and modify buttons
-- Added edit and delete room functionality
-- Initial web app view implementation
-
-## Contributing
-
-1. Create a feature branch from `main`
-2. Make your changes
-3. Run `npm run lint` to check code quality
-4. Commit with descriptive messages
-5. Push and create a pull request
-
-## Troubleshooting
-
-### Metro bundler issues
-```bash
-# Clear Metro bundler cache
-npx expo start -c
-```
-
-### iOS build issues
-```bash
-cd ios
-pod install
-cd ..
-```
-
-### Android build issues
-```bash
-cd android
-./gradlew clean
-cd ..
-```
-
-## License
-
-[Add your license here]
-
-## Contact
-
-[Add contact information or links here]
+- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
+- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
