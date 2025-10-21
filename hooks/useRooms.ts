@@ -4,13 +4,14 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { roomService } from '@/services/roomService';
-import { Room, ApiError } from '@/types/room';
+import { Room, ApiError, RoomUpdatePayload } from '@/types/room';
 
 interface UseRoomsResult {
   rooms: Room[];
   isLoading: boolean;
   error: ApiError | null;
   refetch: () => Promise<void>;
+  addRoom: (payload: RoomUpdatePayload) => Promise<void>;
 }
 
 export function useRooms(): UseRoomsResult {
@@ -39,10 +40,27 @@ export function useRooms(): UseRoomsResult {
     fetchRooms();
   }, [fetchRooms]);
 
+  const addRoom = useCallback(async (payload: RoomUpdatePayload) => {
+    try {
+      setError(null);
+      await roomService.createRoom(payload);
+      // Refresh the rooms list after creating
+      await fetchRooms();
+    } catch (err: any) {
+      setError({
+        message: err.message || 'Failed to create room',
+        status: err.status,
+      });
+      console.error('Error in addRoom:', err);
+      throw err;
+    }
+  }, [fetchRooms]);
+
   return {
     rooms,
     isLoading,
     error,
     refetch: fetchRooms,
+    addRoom,
   };
 }

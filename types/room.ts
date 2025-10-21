@@ -90,7 +90,6 @@ export interface Room {
   name: string;
   available: boolean;
   amenities: Amenity[];
-  color: string;
   description?: string;
   equipment?: Equipment[];
   createdAt?: string;

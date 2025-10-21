@@ -3,6 +3,8 @@ import { View, Text, StyleSheet, Modal, TextInput, TouchableOpacity, ScrollView,
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { roomService } from '@/services/roomService';
 import { ApiCaptureType } from '@/types/room';
+import { useThemeColor } from '@/hooks/use-theme-color';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface RoomEditModalProps {
   visible: boolean;
@@ -19,6 +21,14 @@ export default function RoomEditModal({ visible, roomId, onClose, onSave }: Room
   const [captureTypes, setCaptureTypes] = useState<ApiCaptureType[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+
+  const backgroundColor = useThemeColor({}, 'background');
+  const textColor = useThemeColor({}, 'text');
+  const secondaryTextColor = useThemeColor({}, 'icon');
+  const tintColor = useThemeColor({}, 'tint');
+  const borderColor = useThemeColor({}, 'border');
+
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (visible) {
@@ -80,66 +90,69 @@ export default function RoomEditModal({ visible, roomId, onClose, onSave }: Room
       presentationStyle="pageSheet"
       onRequestClose={onClose}
     >
-      <View style={styles.container}>
-        <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
+      <View style={[styles.container, { backgroundColor }]}>
+        <View style={[styles.header, { paddingTop: insets.top + 16, backgroundColor, borderBottomColor: borderColor }]}>
           <TouchableOpacity onPress={onClose}>
-            <Text style={styles.cancelButton}>Annuler</Text>
+            <Text style={[styles.cancelButton, { color: secondaryTextColor }]}>{t.editRoom.cancel}</Text>
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Modifier la salle</Text>
+          <Text style={[styles.headerTitle, { color: textColor }]}>{t.editRoom.title}</Text>
           <TouchableOpacity onPress={handleSave} disabled={saving}>
-            <Text style={[styles.saveButton, saving && styles.saveButtonDisabled]}>
-              {saving ? 'Enregistrement...' : 'Enregistrer'}
+            <Text style={[styles.saveButton, { color: tintColor }, saving && styles.saveButtonDisabled]}>
+              {saving ? t.editRoom.saving : t.editRoom.save}
             </Text>
           </TouchableOpacity>
         </View>
 
         {loading ? (
           <View style={styles.centered}>
-            <ActivityIndicator size="large" color="#7FB068" />
+            <ActivityIndicator size="large" color={tintColor} />
           </View>
         ) : (
           <ScrollView style={styles.content}>
             <View style={styles.formGroup}>
-              <Text style={styles.label}>Nom de la salle</Text>
+              <Text style={[styles.label, { color: textColor }]}>{t.editRoom.nameLabel}</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, { backgroundColor, borderColor: secondaryTextColor, color: textColor }]}
                 value={name}
                 onChangeText={setName}
-                placeholder="Entrez le nom de la salle"
+                placeholder={t.editRoom.namePlaceholder}
+                placeholderTextColor={secondaryTextColor}
               />
             </View>
 
             <View style={styles.formGroup}>
-              <Text style={styles.label}>Description</Text>
+              <Text style={[styles.label, { color: textColor }]}>{t.editRoom.descriptionLabel}</Text>
               <TextInput
-                style={[styles.input, styles.textArea]}
+                style={[styles.input, styles.textArea, { backgroundColor, borderColor: secondaryTextColor, color: textColor }]}
                 value={description}
                 onChangeText={setDescription}
-                placeholder="Entrez une description"
+                placeholder={t.editRoom.descriptionPlaceholder}
+                placeholderTextColor={secondaryTextColor}
                 multiline
                 numberOfLines={4}
               />
             </View>
 
             <View style={styles.formGroup}>
-              <Text style={styles.label}>Types de capteurs</Text>
+              <Text style={[styles.label, { color: textColor }]}>{t.editRoom.sensorTypesLabel}</Text>
               {captureTypes.map(captureType => (
                 <TouchableOpacity
                   key={captureType.id}
-                  style={styles.checkbox}
+                  style={[styles.checkbox, { backgroundColor, borderColor: secondaryTextColor }]}
                   onPress={() => toggleCaptureType(captureType['@id'])}
                 >
                   <View style={[
                     styles.checkboxBox,
-                    selectedCaptureTypes.includes(captureType['@id']) && styles.checkboxBoxChecked
+                    { borderColor: tintColor },
+                    selectedCaptureTypes.includes(captureType['@id']) && { backgroundColor: tintColor }
                   ]}>
                     {selectedCaptureTypes.includes(captureType['@id']) && (
-                      <Text style={styles.checkboxCheck}>✓</Text>
+                      <Text style={[styles.checkboxCheck, { color: backgroundColor }]}>✓</Text>
                     )}
                   </View>
                   <View style={styles.checkboxLabel}>
-                    <Text style={styles.checkboxText}>{captureType.name}</Text>
-                    <Text style={styles.checkboxDescription}>{captureType.description}</Text>
+                    <Text style={[styles.checkboxText, { color: textColor }]}>{captureType.name}</Text>
+                    <Text style={[styles.checkboxDescription, { color: secondaryTextColor }]}>{captureType.description}</Text>
                   </View>
                 </TouchableOpacity>
               ))}
@@ -154,7 +167,6 @@ export default function RoomEditModal({ visible, roomId, onClose, onSave }: Room
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
   },
   header: {
     flexDirection: 'row',
@@ -162,22 +174,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingBottom: 16,
-    backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#111827',
   },
   cancelButton: {
     fontSize: 16,
-    color: '#6B7280',
   },
   saveButton: {
     fontSize: 16,
-    color: '#7FB068',
     fontWeight: '600',
   },
   saveButtonDisabled: {
@@ -198,17 +205,13 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 8,
   },
   input: {
-    backgroundColor: '#FFFFFF',
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#E0E0E0',
     padding: 12,
     fontSize: 16,
-    color: '#333',
   },
   textArea: {
     minHeight: 100,
@@ -217,28 +220,21 @@ const styles = StyleSheet.create({
   checkbox: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    backgroundColor: '#FFFFFF',
     borderRadius: 8,
     padding: 12,
     marginBottom: 8,
     borderWidth: 1,
-    borderColor: '#E0E0E0',
   },
   checkboxBox: {
     width: 24,
     height: 24,
     borderRadius: 4,
     borderWidth: 2,
-    borderColor: '#7FB068',
     marginRight: 12,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  checkboxBoxChecked: {
-    backgroundColor: '#7FB068',
-  },
   checkboxCheck: {
-    color: '#FFFFFF',
     fontSize: 16,
     fontWeight: 'bold',
   },
@@ -248,11 +244,9 @@ const styles = StyleSheet.create({
   checkboxText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 2,
   },
   checkboxDescription: {
     fontSize: 14,
-    color: '#666',
   },
 });

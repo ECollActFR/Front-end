@@ -1,5 +1,6 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { useThemeColor } from '@/hooks/use-theme-color';
 
 interface ButtonProps {
   title: string;
@@ -16,13 +17,16 @@ export default function Button({
   style,
   textStyle,
 }: ButtonProps) {
+  const backgroundColor = useThemeColor({}, 'tint');
+  const textColor = useThemeColor({}, 'background');
+
   return (
     <TouchableOpacity
-      style={[styles.button, variant === 'primary' && styles.primary, style]}
+      style={[styles.button, variant === 'primary' && { backgroundColor }, style]}
       onPress={onPress}
       activeOpacity={0.8}
     >
-      <Text style={[styles.text, textStyle]}>{title}</Text>
+      <Text style={[styles.text, { color: textColor }, textStyle]}>{title}</Text>
     </TouchableOpacity>
   );
 }
@@ -40,11 +44,7 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 3,
   },
-  primary: {
-    backgroundColor: '#7FB068',
-  },
   text: {
-    color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
   },

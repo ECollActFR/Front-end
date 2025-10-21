@@ -140,4 +140,22 @@ export const roomService = {
       throw error;
     }
   },
+
+  /**
+   * Create a new room
+   */
+  async createRoom(payload: RoomUpdatePayload): Promise<ApiRoom> {
+    try {
+      const response = await apiService.post<ApiRoom>(ENDPOINTS.ROOM_CREATE, payload);
+
+      if (!response) {
+        throw new Error('Invalid API response format');
+      }
+
+      return response;
+    } catch (error) {
+      console.error('Error creating room:', error);
+      throw error;
+    }
+  },
 };

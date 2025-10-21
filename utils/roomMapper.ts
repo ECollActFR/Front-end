@@ -4,16 +4,6 @@
 
 import { ApiRoom, Room, Amenity, Equipment } from '@/types/room';
 
-// Color palette for rooms
-const ROOM_COLORS = [
-  '#7FB068', // Green
-  '#9D8D62', // Brown
-  '#6B9BD1', // Blue
-  '#8B7355', // Dark brown
-  '#E07A5F', // Coral
-  '#81B29A', // Teal
-];
-
 // Map equipment names to amenity types
 const mapEquipmentToAmenities = (equipment: Equipment[]): Amenity[] => {
   const amenities: Amenity[] = [];
@@ -95,7 +85,6 @@ export function mapApiRoomToRoom(apiRoom: ApiRoom, index: number): Room {
     description: apiRoom.description,
     available: isRoomAvailable(apiRoom.name),
     amenities: amenities,
-    color: ROOM_COLORS[index % ROOM_COLORS.length],
     equipment: equipment,
     createdAt: apiRoom.createdAt,
   };

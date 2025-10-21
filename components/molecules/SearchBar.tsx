@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Icon, Input } from '../atoms';
+import { useThemeColor } from '@/hooks/use-theme-color';
 
 interface SearchBarProps {
   value: string;
@@ -13,9 +14,12 @@ export default function SearchBar({
   onChangeText,
   placeholder = 'Rechercher...',
 }: SearchBarProps) {
+  const backgroundColor = useThemeColor({}, 'background');
+  const borderColor = useThemeColor({}, 'icon');
+
   return (
-    <View style={styles.container}>
-      <Icon name="search" size={20} color="#6B7280" style={styles.icon} />
+    <View style={[styles.container, { backgroundColor, borderColor }]}>
+      <Icon name="search" size={20} style={styles.icon} />
       <Input
         value={value}
         onChangeText={onChangeText}
@@ -30,10 +34,8 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F3F4F6',
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#D1D5DB',
     paddingHorizontal: 12,
   },
   icon: {

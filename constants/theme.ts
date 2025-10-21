@@ -5,25 +5,39 @@
 
 import { Platform } from 'react-native';
 
-const tintColorLight = '#0a7ea4';
-const tintColorDark = '#fff';
+const tintColorLight = '#7E9F78';
+const tintColorDark = '#7E9F78';
 
 export const Colors = {
   light: {
-    text: '#11181C',
-    background: '#fff',
-    tint: tintColorLight,
-    icon: '#687076',
-    tabIconDefault: '#687076',
+    text: '#7692ff', // Textes principaux (bleu)
+    textSecondary: '#1E2E3D', // Textes secondaires (bleu nuit)
+    background: '#F3F4F6', // Couleur d'arrière plan (gris moderne)
+    backgroundSecondary: '#FFFFFF', // Arrière plan secondaire (blanc)
+    cardGreen: '#F5F7F3', // Fond carte vert olive subtil
+    cardBlue: '#F6F8FC', // Fond carte bleu subtil
+    cardNeutral: '#FAFAFA', // Fond carte neutre
+    tint: tintColorLight, // Boutons (vert olive)
+    icon: '#7E9F78', // Icônes
+    tabIconDefault: '#7E9F78',
     tabIconSelected: tintColorLight,
+    accentOrange: '#ef7b45', // Liens (orange)
+    border: '#7E9F78', // Bordures
   },
   dark: {
-    text: '#ECEDEE',
-    background: '#151718',
-    tint: tintColorDark,
-    icon: '#9BA1A6',
-    tabIconDefault: '#9BA1A6',
+    text: '#EAECEB', // Textes principaux (gris clair pour contraste)
+    textSecondary: '#7692ff', // Textes secondaires (bleu)
+    background: '#1E2E3D', // Couleur d'arrière plan (bleu nuit)
+    backgroundSecondary: '#2A3F54', // Arrière plan secondaire (bleu nuit plus clair)
+    cardGreen: '#2A3F48', // Fond carte vert olive subtil (mode sombre)
+    cardBlue: '#2A3850', // Fond carte bleu subtil (mode sombre)
+    cardNeutral: '#2A3F54', // Fond carte neutre (mode sombre)
+    tint: tintColorDark, // Boutons (vert olive)
+    icon: '#7E9F78', // Icônes
+    tabIconDefault: '#7E9F78',
     tabIconSelected: tintColorDark,
+    accentOrange: '#ef7b45', // Liens (orange)
+    border: '#7E9F78', // Bordures
   },
 };
 

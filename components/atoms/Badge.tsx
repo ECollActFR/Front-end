@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, ViewStyle } from 'react-native';
+import { useThemeColor } from '@/hooks/use-theme-color';
 
 type BadgeVariant = 'occupied' | 'selected';
 
@@ -10,18 +11,22 @@ interface BadgeProps {
 }
 
 export default function Badge({ variant, text, style }: BadgeProps) {
+  const backgroundColor = useThemeColor({}, 'background');
+  const tintColor = useThemeColor({}, 'tint');
+  const accentOrange = useThemeColor({}, 'accentOrange');
+
   const variantStyles = {
     occupied: {
-      backgroundColor: '#FFFFFF',
-      textColor: '#D57050',
+      backgroundColor,
+      textColor: accentOrange,
     },
     selected: {
-      backgroundColor: '#FFFFFF',
-      textColor: '#7FB068',
+      backgroundColor,
+      textColor: tintColor,
     },
   };
 
-  const { backgroundColor, textColor } = variantStyles[variant];
+  const { textColor } = variantStyles[variant];
 
   return (
     <View style={[styles.badge, { backgroundColor }, style]}>

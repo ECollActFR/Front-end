@@ -2,12 +2,18 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Equipment } from '@/types/room';
 import Icon from '@/components/atoms/Icon';
+import { useThemeColor } from '@/hooks/use-theme-color';
 
 interface EquipmentItemProps {
   equipment: Equipment;
 }
 
 export default function EquipmentItem({ equipment }: EquipmentItemProps) {
+  const backgroundColor = useThemeColor({}, 'background');
+  const textColor = useThemeColor({}, 'text');
+  const secondaryTextColor = useThemeColor({}, 'icon');
+  const tintColor = useThemeColor({}, 'tint');
+
   // Map equipment name to icon
   const getIcon = (name: string): string => {
     const lowerName = name.toLowerCase();
@@ -23,13 +29,13 @@ export default function EquipmentItem({ equipment }: EquipmentItemProps) {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.iconContainer}>
-        <Icon name={getIcon(equipment.name)} size={20} color="#7FB068" />
+    <View style={[styles.container, { backgroundColor }]}>
+      <View style={[styles.iconContainer, { backgroundColor: secondaryTextColor + '20' }]}>
+        <Icon name={getIcon(equipment.name)} size={20} color={tintColor} />
       </View>
       <View style={styles.content}>
-        <Text style={styles.name}>{equipment.name}</Text>
-        <Text style={styles.capacity}>Capacité: {equipment.capacity}</Text>
+        <Text style={[styles.name, { color: textColor }]}>{equipment.name}</Text>
+        <Text style={[styles.capacity, { color: secondaryTextColor }]}>Capacité: {equipment.capacity}</Text>
       </View>
     </View>
   );
@@ -39,7 +45,6 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
     borderRadius: 12,
     padding: 12,
     marginBottom: 8,
@@ -53,7 +58,6 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 8,
-    backgroundColor: '#F0F9FF',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
@@ -64,11 +68,9 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#111827',
     marginBottom: 2,
   },
   capacity: {
     fontSize: 14,
-    color: '#6B7280',
   },
 });

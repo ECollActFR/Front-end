@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Icon from '../atoms/Icon';
+import { useThemeColor } from '@/hooks/use-theme-color';
 
 type AmenityType = 'wifi' | 'monitor' | 'coffee';
 
@@ -25,11 +26,14 @@ const AMENITY_CONFIG = {
 
 export default function AmenityChip({ type }: AmenityChipProps) {
   const config = AMENITY_CONFIG[type];
+  const textColor = useThemeColor({}, 'text');
+  const tintColor = useThemeColor({}, 'tint');
+  const secondaryTextColor = useThemeColor({}, 'icon');
 
   return (
-    <View style={styles.chip}>
-      <Icon name={config.icon} size={18} color="#7FB068" />
-      <Text style={styles.label}>{config.label}</Text>
+    <View style={[styles.chip, { backgroundColor: tintColor + '20', borderColor: secondaryTextColor + '60' }]}>
+      <Icon name={config.icon} size={18} color={tintColor} />
+      <Text style={[styles.label, { color: textColor }]}>{config.label}</Text>
     </View>
   );
 }
@@ -38,17 +42,14 @@ const styles = StyleSheet.create({
   chip: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F0F9FF',
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 20,
     gap: 8,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
   },
   label: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#111827',
   },
 });

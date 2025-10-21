@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { LastCaptureByType } from '@/types/room';
+import { useThemeColor } from '@/hooks/use-theme-color';
 
 interface SensorCardProps {
   captureData: LastCaptureByType;
@@ -59,6 +60,11 @@ export default function SensorCard({ captureData }: SensorCardProps) {
   const unit = getUnit(type.description);
   const icon = getIcon(type.name);
 
+  const cardBackground = useThemeColor({}, 'cardBlue');
+  const textColor = useThemeColor({}, 'text');
+  const secondaryTextColor = useThemeColor({}, 'icon');
+  const tintColor = useThemeColor({}, 'tint');
+
   // Use dateCaptured if available, fallback to createdAt
   const dateString = capture.dateCaptured || capture.createdAt || '';
 
@@ -78,17 +84,17 @@ export default function SensorCard({ captureData }: SensorCardProps) {
   });
 
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, { backgroundColor: cardBackground }]}>
       <View style={styles.header}>
         <Text style={styles.icon}>{icon}</Text>
         <View style={styles.headerText}>
-          <Text style={styles.description}>{capture.description}</Text>
-          <Text style={styles.timestamp}>{actualTime} • {relativeTime}</Text>
+          <Text style={[styles.description, { color: textColor }]}>{capture.description}</Text>
+          <Text style={[styles.timestamp, { color: secondaryTextColor }]}>{actualTime} • {relativeTime}</Text>
         </View>
       </View>
       <View style={styles.valueContainer}>
-        <Text style={styles.value}>{capture.value}</Text>
-        {unit && <Text style={styles.unit}>{unit}</Text>}
+        <Text style={[styles.value, { color: tintColor }]}>{capture.value}</Text>
+        {unit && <Text style={[styles.unit, { color: secondaryTextColor }]}>{unit}</Text>}
       </View>
     </View>
   );
@@ -96,16 +102,13 @@ export default function SensorCard({ captureData }: SensorCardProps) {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.15,
     shadowRadius: 8,
-    elevation: 3,
-    borderWidth: 1,
-    borderColor: '#F0F9FF',
+    elevation: 4,
   },
   header: {
     flexDirection: 'row',
@@ -122,12 +125,10 @@ const styles = StyleSheet.create({
   description: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#111827',
     marginBottom: 2,
   },
   timestamp: {
     fontSize: 12,
-    color: '#9CA3AF',
   },
   valueContainer: {
     flexDirection: 'row',
@@ -136,13 +137,11 @@ const styles = StyleSheet.create({
   value: {
     fontSize: 48,
     fontWeight: '700',
-    color: '#7FB068',
     letterSpacing: -1,
   },
   unit: {
     fontSize: 24,
     fontWeight: '500',
-    color: '#6B7280',
     marginLeft: 4,
   },
 });

@@ -1,523 +1,310 @@
-# Neutria - Environmental Monitoring API
+# Neutria Front-end - Environmental Monitoring App
 
-Neutria is a RESTful API built with Symfony and API Platform designed to monitor and track environmental metrics in different rooms or spaces. The system captures various environmental data points like temperature, humidity, CO2 levels, luminosity, and noise levels.
+Application mobile cross-platform (iOS, Android, Web) pour le monitoring environnemental développée avec Expo et React Native.
 
-## Overview
+## Vue d'ensemble
 
-Neutria provides a comprehensive solution for monitoring environmental conditions across multiple rooms. Each room can have different types of sensors (capture types), and the system records measurements over time, allowing for historical tracking and analysis.
+Cette application mobile permet de surveiller et gérer les conditions environnementales de différentes salles en temps réel. Elle se connecte à l'API Backend Neutria pour afficher les données des capteurs, gérer les salles et leurs équipements.
 
-### Key Features
+### Fonctionnalités principales
 
-- **Multi-room monitoring**: Track environmental metrics across multiple rooms/spaces
-- **Flexible capture types**: Support for temperature, humidity, CO2, luminosity, and noise measurements
-- **Historical data tracking**: Store and retrieve historical environmental data
-- **Equipment management**: Associate equipment with rooms to track resources
-- **Acquisition systems**: Manage data acquisition systems linked to specific rooms
-- **RESTful API**: Full CRUD operations via API Platform
-- **Interactive documentation**: Swagger/OpenAPI documentation auto-generated
+- **Surveillance multi-salles** : Visualisation de toutes les salles avec recherche et filtrage
+- **Données en temps réel** : Affichage des dernières mesures de capteurs (température, humidité, CO2, luminosité, bruit)
+- **Gestion des salles** : Création, modification et suppression de salles
+- **Responsive design** : Interface adaptative pour mobile et desktop (breakpoint à 768px)
+- **Mode clair/sombre** : Support automatique du thème système
+- **Gestion des équipements** : Visualisation des équipements associés à chaque salle
 
-## Technologies Used
+## Technologies utilisées
 
-- **Symfony 7.3** - Modern PHP framework
-- **API Platform 4.2** - REST and GraphQL API framework
-- **Doctrine ORM 3.5** - Database abstraction and ORM
-- **PHP 8.2+** - Latest PHP version
-- **MariaDB/MySQL** - Database server
-- **LexikJWTAuthenticationBundle** - JWT authentication
-- **Docker & Docker Compose** - Containerization
-- **Nginx** - Web server
-- **Carbon** - DateTime manipulation library
+- **Expo SDK** ~53.0.0 - Framework React Native
+- **React** 19.1.0 - Bibliothèque UI
+- **React Native** 0.81.4 - Framework mobile
+- **Expo Router** ~6.0.10 - Navigation file-based
+- **TypeScript** ~5.3.3 - Typage statique
+- **React Native Reanimated** ~4.1.1 - Animations
+- **React Native Gesture Handler** ~2.28.0 - Gestion des gestes
 
-## Prerequisites
+## Prérequis
 
-- Docker (version 20.10 or higher)
-- Docker Compose (version 2.0 or higher)
-- Git
-- (Optional) Make
+- Node.js (version 18 ou supérieure)
+- npm ou yarn
+- Pour le développement mobile :
+  - iOS : macOS avec Xcode
+  - Android : Android Studio avec SDK Android
+- Expo Go app (pour tester sur appareil physique)
 
 ## Installation
 
-### 1. Clone the Repository
+### 1. Cloner le dépôt
 
 ```bash
 git clone <repository-url>
-cd neutria/Back-end
+cd neutria/Front-end
 ```
 
-### 2. Environment Configuration
-
-The project includes environment templates. The default configuration works out of the box with Docker.
+### 2. Installer les dépendances
 
 ```bash
-cd api
-cp .env.template .env
+npm install
 ```
 
-Key environment variables:
-- `APP_ENV`: Application environment (`dev` or `prod`)
-- `APP_SECRET`: Application secret key
-- `DATABASE_URL`: Database connection string
-- `JWT_PASSPHRASE`: Passphrase for JWT encryption
+### 3. Configuration
 
-### 3. Start Docker Containers
+Vérifier la configuration de l'API dans `constants/config.ts` :
+
+```typescript
+export const API_BASE_URL = 'https://your-api-url.com';
+```
+
+## Démarrage
+
+### Serveur de développement
 
 ```bash
-docker compose up -d
+npm start
+# ou
+npx expo start
 ```
 
-This will start three services:
-- **nginx**: Web server (accessible at http://localhost:8000)
-- **php**: PHP-FPM service
-- **database**: MariaDB database
-
-### 4. Install Dependencies
+### Plateformes spécifiques
 
 ```bash
-docker compose exec php composer install
+# Android
+npm run android
+
+# iOS
+npm run ios
+
+# Web
+npm run web
 ```
 
-### 5. Database Setup
-
-Create the database and run migrations:
-
-```bash
-# Create database
-docker compose exec php php bin/console doctrine:database:create
-
-# Run migrations
-docker compose exec php php bin/console doctrine:migrations:migrate
-```
-
-### 6. Load Sample Data (Optional)
-
-To populate the database with sample data:
-
-```bash
-docker compose exec php php bin/console doctrine:fixtures:load
-```
-
-This will create:
-- 5 capture types (Temperature, Humidity, CO2, Luminosity, Noise)
-- 6 sample rooms (Bureau A1, Bureau A2, Open Space, Reunion, Kitchen, Hall)
-- Sample environmental captures for each room
-
-### 7. Generate JWT Keys (if using authentication)
-
-```bash
-docker compose exec php php bin/console lexik:jwt:generate-keypair
-```
-
-## Usage
-
-### Access Points
-
-- **API Base URL**: http://localhost:8000
-- **API Documentation**: http://localhost:8000/api (Interactive Swagger UI)
-- **Database**: localhost:3306
-
-### API Endpoints
-
-#### Rooms
-
-- `GET /api/rooms` - List all rooms
-- `GET /api/rooms/{id}` - Get a specific room
-- `GET /api/rooms/{id}/last` - Get room with last captures by type
-- `POST /api/rooms` - Create a new room
-- `PUT /api/rooms/{id}` - Update a room (full)
-- `PATCH /api/rooms/{id}` - Update a room (partial)
-- `DELETE /api/rooms/{id}` - Delete a room
-
-#### Captures
-
-- `GET /api/captures` - List all captures (paginated)
-- `GET /api/captures/{id}` - Get a specific capture
-
-Pagination parameters:
-- `?page=1` - Page number
-- `?itemsPerPage=30` - Items per page
-
-#### Capture Types
-
-- `GET /api/capture_types` - List all capture types
-- `GET /api/capture_types/{id}` - Get a specific capture type
-- `POST /api/capture_types` - Create a new capture type
-- `PUT /api/capture_types/{id}` - Update a capture type
-- `DELETE /api/capture_types/{id}` - Delete a capture type
-
-#### Equipment
-
-- `GET /api/equipment` - List all equipment
-- `GET /api/equipment/{id}` - Get specific equipment
-- `POST /api/equipment` - Create new equipment
-- `PUT /api/equipment/{id}` - Update equipment
-- `DELETE /api/equipment/{id}` - Delete equipment
-
-#### Acquisition Systems
-
-- `GET /api/acquisition_systems` - List all acquisition systems
-- `GET /api/acquisition_systems/{id}` - Get a specific system
-- `POST /api/acquisition_systems` - Create a new system
-- `PUT /api/acquisition_systems/{id}` - Update a system
-- `DELETE /api/acquisition_systems/{id}` - Delete a system
-
-### API Examples
-
-#### Get all rooms with pagination
-
-```bash
-curl -X GET "http://localhost:8000/api/rooms?page=1"
-```
-
-#### Get a room with its last captures by type
-
-```bash
-curl -X GET "http://localhost:8000/api/rooms/1/last"
-```
-
-Response example:
-```json
-{
-  "id": 1,
-  "name": "Bureau A1",
-  "description": "Bureau individuel côté sud",
-  "createdAt": "2025-10-10 12:30:00",
-  "lastCapturesByType": [
-    {
-      "type": {
-        "id": 1,
-        "name": "Temperature",
-        "description": "Mesure température en °C"
-      },
-      "capture": {
-        "id": 42,
-        "value": "21.5",
-        "description": "Température",
-        "createdAt": "2025-10-10T12:25:00+00:00",
-        "dateCaptured": "2025-10-10T12:25:00+00:00"
-      }
-    }
-  ]
-}
-```
-
-#### Create a new room
-
-```bash
-curl -X POST "http://localhost:8000/api/rooms" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "Lab 1",
-    "description": "Research laboratory"
-  }'
-```
-
-#### Get paginated captures
-
-```bash
-curl -X GET "http://localhost:8000/api/captures?page=1&itemsPerPage=20"
-```
-
-## Data Model
-
-### Room
-Represents a physical space being monitored.
-
-**Attributes:**
-- `id`: Unique identifier
-- `name`: Room name (max 15 characters)
-- `description`: Room description (optional)
-- `createdAt`: Creation timestamp
-- `captureTypes`: Associated capture types (many-to-many)
-- `captures`: Environmental captures (one-to-many)
-- `equipment`: Equipment in the room (many-to-many)
-- `acquisitionSystems`: Data acquisition systems (one-to-many)
-
-### Capture
-Represents a single environmental measurement.
-
-**Attributes:**
-- `id`: Unique identifier
-- `value`: Measurement value (decimal 6,2)
-- `description`: Capture description
-- `room`: Associated room
-- `type`: Type of capture (temperature, humidity, etc.)
-- `createdAt`: Record creation timestamp
-- `dateCaptured`: When the measurement was taken
-
-### CaptureType
-Defines types of environmental measurements.
-
-**Attributes:**
-- `id`: Unique identifier
-- `name`: Type name (max 50 characters)
-- `description`: Type description
-- `createdAt`: Creation timestamp
-
-**Default types:**
-- Temperature (°C)
-- Humidity (%)
-- CO2 (ppm)
-- Luminosity (lux)
-- Noise (dB)
-
-### Equipment
-Represents equipment or devices in rooms.
-
-**Attributes:**
-- `id`: Unique identifier
-- `name`: Equipment name
-- `capacity`: Equipment capacity (optional)
-- `createdAt`: Creation timestamp
-- `rooms`: Associated rooms (many-to-many)
-
-### AcquisitionSystem
-Represents data acquisition systems attached to rooms.
-
-**Attributes:**
-- `id`: Unique identifier
-- `name`: System name
-- `room`: Associated room
-- `createdAt`: Creation timestamp
-
-## Project Structure
+## Structure du projet
 
 ```
 .
-├── api/                          # Symfony application
-│   ├── bin/                      # Console commands
-│   ├── config/                   # Configuration files
-│   │   ├── packages/             # Bundle configuration
-│   │   ├── routes/               # Route definitions
-│   │   └── jwt/                  # JWT keys (gitignored)
-│   ├── migrations/               # Database migrations
-│   ├── public/                   # Public web directory
-│   ├── src/
-│   │   ├── Controller/           # Custom controllers
-│   │   │   └── RoomController.php
-│   │   ├── DataFixtures/         # Database fixtures
-│   │   │   └── AppFixtures.php
-│   │   ├── Entity/               # Doctrine entities
-│   │   │   ├── Room.php
-│   │   │   ├── Capture.php
-│   │   │   ├── CaptureType.php
-│   │   │   ├── Equipment.php
-│   │   │   └── AcquisitionSystem.php
-│   │   └── Repository/           # Doctrine repositories
-│   ├── var/                      # Cache and logs
-│   ├── vendor/                   # Composer dependencies
-│   ├── .env                      # Environment variables
-│   └── composer.json             # PHP dependencies
-├── build/                        # Docker build files
-│   ├── nginx/                    # Nginx configuration
-│   ├── php/                      # PHP-FPM configuration
-│   └── database/                 # Database configuration
-├── compose.yaml                  # Docker Compose configuration
-└── README.md                     # This file
+├── app/                          # Navigation Expo Router
+│   ├── (tabs)/                   # Groupe de navigation par onglets
+│   │   ├── _layout.tsx          # Layout des onglets
+│   │   └── index.tsx            # Écran d'accueil (liste des salles)
+│   ├── room/
+│   │   └── [id].tsx             # Écran de détail d'une salle
+│   ├── _layout.tsx              # Layout racine
+│   └── +not-found.tsx           # Écran 404
+├── components/                   # Composants réutilisables
+│   ├── atoms/                   # Composants atomiques
+│   │   ├── Badge.tsx
+│   │   ├── Button.tsx
+│   │   ├── Icon.tsx
+│   │   ├── Input.tsx
+│   │   └── LoadingSpinner.tsx
+│   ├── molecules/               # Composants moléculaires
+│   │   ├── AmenityChip.tsx
+│   │   ├── AmenityList.tsx
+│   │   ├── ConfirmDeleteModal.tsx
+│   │   ├── DetailRow.tsx
+│   │   ├── EquipmentItem.tsx
+│   │   ├── ErrorMessage.tsx
+│   │   └── SearchBar.tsx
+│   ├── organisms/               # Composants organismes
+│   │   ├── RoomCard.tsx
+│   │   ├── RoomEditModal.tsx
+│   │   └── SensorCard.tsx
+│   └── ui/                      # Composants UI système
+│       └── icon-symbol.tsx
+├── constants/                    # Constantes et configuration
+│   ├── config.ts                # Configuration API
+│   └── theme.ts                 # Thème et couleurs
+├── hooks/                        # Custom hooks
+│   ├── useRooms.ts              # Hook de gestion des salles
+│   └── useRoomDetail.ts         # Hook de détail d'une salle
+├── services/                     # Services API
+│   └── roomService.ts           # Service de gestion des salles
+├── types/                        # Définitions TypeScript
+│   └── room.ts                  # Types pour les salles
+├── CLAUDE.md                     # Instructions pour Claude Code
+└── README.md                     # Ce fichier
 ```
 
-## Development
+## Palette de couleurs
 
-### Useful Commands
+L'application utilise une palette de couleurs cohérente définie dans `constants/theme.ts` :
 
-#### Doctrine
+### Mode clair
+- **Textes principaux** : `#7692ff` (bleu)
+- **Textes secondaires** : `#1E2E3D` (bleu nuit)
+- **Arrière-plan** : `#EAECEB` (gris clair/pierre)
+- **Arrière-plan secondaire** : `#FFFFFF` (blanc)
+- **Boutons** : `#7E9F78` (vert olive)
+- **Icônes** : `#7E9F78` (vert olive)
+- **Liens** : `#ef7b45` (orange)
+- **Bordures** : `#7E9F78` (vert olive)
+
+### Mode sombre
+- **Textes principaux** : `#EAECEB` (gris clair)
+- **Textes secondaires** : `#7692ff` (bleu)
+- **Arrière-plan** : `#1E2E3D` (bleu nuit)
+- **Arrière-plan secondaire** : `#2A3F54` (bleu nuit clair)
+- **Boutons** : `#7E9F78` (vert olive)
+- **Icônes** : `#7E9F78` (vert olive)
+- **Liens** : `#ef7b45` (orange)
+- **Bordures** : `#7E9F78` (vert olive)
+
+## Architecture
+
+### Navigation
+
+L'application utilise Expo Router pour une navigation file-based :
+- Routes définies dans le dossier `app/`
+- Navigation par onglets dans `app/(tabs)/`
+- Routes dynamiques avec `[id].tsx`
+
+### Gestion d'état
+
+- **Custom hooks** pour la logique métier
+- **React hooks** (useState, useEffect) pour l'état local
+- Pas de bibliothèque de gestion d'état globale pour le moment
+
+### Services API
+
+Les services dans `services/` gèrent les appels API :
+- `roomService.ts` : CRUD pour les salles
+- Configuration centralisée dans `constants/config.ts`
+
+## Fonctionnalités détaillées
+
+### Écran d'accueil
+
+- Liste de toutes les salles avec cartes visuelles
+- Barre de recherche pour filtrer par nom ou description
+- Bouton "Ajouter" pour créer une nouvelle salle
+- Layout responsive (grille 3 colonnes sur desktop)
+- Indicateur de disponibilité des salles
+
+### Détail d'une salle
+
+- En-tête avec couleur de la salle
+- Affichage des dernières données de capteurs en temps réel
+- Liste des équipements
+- Liste des commodités
+- Statut de disponibilité
+- Boutons d'édition et suppression
+- Bouton de réservation (si disponible)
+
+### Gestion des salles
+
+- Modal de création/édition
+- Sélection des types de capteurs
+- Validation des champs requis
+- Confirmation avant suppression
+
+## Développement
+
+### Commandes utiles
 
 ```bash
-# Create a new entity
-docker compose exec php php bin/console make:entity
+# Linter
+npm run lint
 
-# Generate a migration after entity changes
-docker compose exec php php bin/console make:migration
-
-# Execute pending migrations
-docker compose exec php php bin/console doctrine:migrations:migrate
-
-# Check database schema sync
-docker compose exec php php bin/console doctrine:schema:validate
+# Reset du projet
+npm run reset-project
 ```
 
-#### Cache Management
+### Ajout de nouveaux composants
+
+1. Créer le composant dans le dossier approprié (`atoms/`, `molecules/`, `organisms/`)
+2. Utiliser TypeScript pour le typage
+3. Utiliser les couleurs du thème avec `useThemeColor`
+4. Exporter depuis `components/index.ts` si nécessaire
+
+### Bonnes pratiques
+
+- **Pas de bibliothèques web-only** : N'utilisez pas Radix UI, Headless UI ou autres bibliothèques spécifiques au web
+- **Thème** : Toujours utiliser les couleurs du thème via `useThemeColor`
+- **Alias de chemin** : Utiliser `@/` pour les imports
+- **TypeScript** : Typer toutes les props et fonctions
+- **Responsive** : Utiliser `useWindowDimensions` et le breakpoint 768px
+
+## Connexion au Backend
+
+L'application se connecte à l'API Neutria Backend. Assurez-vous que :
+1. Le backend est démarré et accessible
+2. L'URL de l'API est correctement configurée dans `constants/config.ts`
+3. CORS est configuré sur le backend pour autoriser l'application
+
+Endpoints utilisés :
+- `GET /api/rooms` - Liste des salles
+- `GET /api/rooms/{id}` - Détail d'une salle
+- `GET /api/rooms/{id}/last` - Salle avec dernières captures
+- `POST /api/rooms` - Création d'une salle
+- `PUT /api/rooms/{id}` - Modification d'une salle
+- `DELETE /api/rooms/{id}` - Suppression d'une salle
+- `GET /api/capture_types` - Types de capteurs
+
+## Build pour production
+
+### Android
 
 ```bash
-# Clear cache
-docker compose exec php php bin/console cache:clear
-
-# Warm up cache
-docker compose exec php php bin/console cache:warmup
+eas build --platform android
 ```
 
-#### Database Management
+### iOS
 
 ```bash
-# Drop database (WARNING: deletes all data)
-docker compose exec php php bin/console doctrine:database:drop --force
-
-# Create database
-docker compose exec php php bin/console doctrine:database:create
-
-# Load fixtures (sample data)
-docker compose exec php php bin/console doctrine:fixtures:load --no-interaction
+eas build --platform ios
 ```
 
-#### Debugging
+### Web
 
 ```bash
-# View application logs
-docker compose logs -f php
-
-# View nginx logs
-docker compose logs -f nginx
-
-# View database logs
-docker compose logs -f database
-
-# List all routes
-docker compose exec php php bin/console debug:router
-
-# Check container configuration
-docker compose exec php php bin/console debug:config
-
-# Access PHP container shell
-docker compose exec php bash
+npx expo export:web
 ```
 
-### Adding New Entities
+## Compatibilité
 
-1. Generate entity:
-```bash
-docker compose exec php php bin/console make:entity EntityName
-```
+- **iOS** : iOS 13.4+
+- **Android** : Android 5.0+ (API 21+)
+- **Web** : Navigateurs modernes (Chrome, Firefox, Safari, Edge)
 
-2. Create migration:
-```bash
-docker compose exec php php bin/console make:migration
-```
+## Dépannage
 
-3. Run migration:
-```bash
-docker compose exec php php bin/console doctrine:migrations:migrate
-```
-
-4. Update fixtures if needed (`api/src/DataFixtures/AppFixtures.php`)
-
-### Custom Endpoints
-
-Custom endpoints are defined in controllers (e.g., `RoomController.php:21`). The `/api/rooms/{id}/last` endpoint demonstrates how to create custom operations that return aggregated data.
-
-## Security Considerations
-
-- JWT keys are auto-generated and stored in `api/config/jwt/`
-- **Never commit** sensitive files:
-  - `.env.local`
-  - `config/jwt/private.pem`
-  - `config/jwt/public.pem`
-- Database credentials are defined in `compose.yaml` (change for production)
-- CORS configuration in `config/packages/nelmio_cors.yaml`
-- Use strong passwords and secrets in production environments
-
-## Production Deployment
-
-### Preparation
-
-1. Update environment variables:
-```bash
-APP_ENV=prod
-APP_DEBUG=0
-```
-
-2. Optimize Composer autoloader:
-```bash
-composer install --no-dev --optimize-autoloader
-```
-
-3. Clear and warm up cache:
-```bash
-php bin/console cache:clear --env=prod
-php bin/console cache:warmup --env=prod
-```
-
-4. Set proper file permissions:
-```bash
-chmod -R 755 var/cache var/log
-```
-
-### Recommendations
-
-- Use environment variables for sensitive configuration
-- Enable HTTPS/SSL
-- Configure proper database backups
-- Implement rate limiting
-- Monitor application logs
-- Use a process manager (e.g., supervisord) for PHP-FPM
-- Consider using Redis/Memcached for caching
-- Implement proper monitoring (e.g., Prometheus, Grafana)
-
-## Testing
+### Problèmes de connexion API
 
 ```bash
-# Run tests (when implemented)
-docker compose exec php php bin/phpunit
+# Vérifier l'URL de l'API dans constants/config.ts
+# Vérifier que le backend est démarré
+# Vérifier la configuration CORS du backend
 ```
 
-## Troubleshooting
-
-### Database Connection Issues
+### Problèmes de build
 
 ```bash
-# Check database service status
-docker compose ps database
+# Nettoyer le cache
+npx expo start -c
 
-# Verify database credentials in .env match compose.yaml
-cat api/.env | grep DATABASE_URL
+# Réinstaller les dépendances
+rm -rf node_modules package-lock.json
+npm install
 ```
 
-### Permission Issues
+## Contribution
 
-```bash
-# Fix cache/log permissions
-docker compose exec php chmod -R 777 var/cache var/log
-```
+1. Fork le dépôt
+2. Créer une branche feature (`git checkout -b feature/nouvelle-fonctionnalite`)
+3. Commit les changements (`git commit -m 'Ajout nouvelle fonctionnalité'`)
+4. Push vers la branche (`git push origin feature/nouvelle-fonctionnalite`)
+5. Ouvrir une Pull Request
 
-### API Platform Not Showing
+## Licence
 
-```bash
-# Clear cache
-docker compose exec php php bin/console cache:clear
+Ce projet est sous licence GNU General Public License v3.0 (GPL-3.0).
 
-# Check routes
-docker compose exec php php bin/console debug:router | grep api
-```
+## Auteurs
 
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-### Code Standards
-
-- Follow PSR-12 coding standards
-- Use type hints for parameters and return types
-- Document complex logic with comments
-- Write meaningful commit messages
-
-## License
-
-This project is licensed under the GNU General Public License v3.0 (GPL-3.0). See the [LICENSE](LICENSE) file for details.
-
-## Authors
-
-- Project maintained by the Neutria team
+- Projet maintenu par l'équipe Neutria
 
 ## Support
 
-For issues, questions, or contributions, please use the GitHub issue tracker.
-
-## Acknowledgments
-
-- [Symfony](https://symfony.com/)
-- [API Platform](https://api-platform.com/)
-- [Doctrine ORM](https://www.doctrine-project.org/)
-- [LexikJWTAuthenticationBundle](https://github.com/lexik/LexikJWTAuthenticationBundle)
-- [Carbon](https://carbon.nesbot.com/)
+Pour les problèmes, questions ou contributions, utilisez le système d'issues GitHub.

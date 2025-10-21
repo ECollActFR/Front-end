@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Icon from '../atoms/Icon';
+import { useThemeColor } from '@/hooks/use-theme-color';
 
 type IconName = 'users' | 'map-pin' | 'wifi' | 'monitor' | 'coffee' | 'check';
 
@@ -11,14 +12,18 @@ interface DetailRowProps {
 }
 
 export default function DetailRow({ icon, label, value }: DetailRowProps) {
+  const textColor = useThemeColor({}, 'text');
+  const secondaryTextColor = useThemeColor({}, 'icon');
+  const tintColor = useThemeColor({}, 'tint');
+
   return (
-    <View style={styles.container}>
-      <View style={styles.iconContainer}>
-        <Icon name={icon} size={20} color="#7FB068" />
+    <View style={[styles.container, { borderBottomColor: secondaryTextColor + '40' }]}>
+      <View style={[styles.iconContainer, { backgroundColor: tintColor + '20' }]}>
+        <Icon name={icon} size={20} color={tintColor} />
       </View>
       <View style={styles.textContainer}>
-        <Text style={styles.label}>{label}</Text>
-        <Text style={styles.value}>{value}</Text>
+        <Text style={[styles.label, { color: secondaryTextColor }]}>{label}</Text>
+        <Text style={[styles.value, { color: textColor }]}>{value}</Text>
       </View>
     </View>
   );
@@ -30,13 +35,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
   },
   iconContainer: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#F0F9FF',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 16,
@@ -46,12 +49,10 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 14,
-    color: '#6B7280',
     marginBottom: 2,
   },
   value: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#111827',
   },
 });

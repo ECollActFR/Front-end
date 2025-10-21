@@ -1,5 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Modal, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { useThemeColor } from '@/hooks/use-theme-color';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface ConfirmDeleteModalProps {
   visible: boolean;
@@ -16,6 +18,14 @@ export default function ConfirmDeleteModal({
   onCancel,
   isDeleting = false
 }: ConfirmDeleteModalProps) {
+  const backgroundColor = useThemeColor({}, 'background');
+  const textColor = useThemeColor({}, 'text');
+  const secondaryTextColor = useThemeColor({}, 'icon');
+  const buttonBackgroundColor = useThemeColor({}, 'background');
+  const accentOrange = useThemeColor({}, 'accentOrange');
+
+  const { t } = useTranslation();
+
   return (
     <Modal
       visible={visible}
@@ -24,34 +34,34 @@ export default function ConfirmDeleteModal({
       onRequestClose={onCancel}
     >
       <View style={styles.overlay}>
-        <View style={styles.modal}>
-          <Text style={styles.title}>Supprimer la salle</Text>
-          <Text style={styles.message}>
-            Êtes-vous sûr de vouloir supprimer &ldquo;{roomName}&rdquo; ?
+        <View style={[styles.modal, { backgroundColor }]}>
+          <Text style={[styles.title, { color: textColor }]}>{t.deleteConfirm.title}</Text>
+          <Text style={[styles.message, { color: secondaryTextColor }]}>
+            {t.deleteConfirm.message}
           </Text>
-          <Text style={styles.warning}>
-            Cette action est irréversible.
+          <Text style={[styles.warning, { color: accentOrange }]}>
+            {/* Message already included in deleteConfirm.message */}
           </Text>
 
           <View style={styles.buttons}>
             <TouchableOpacity
-              style={[styles.button, styles.cancelButton]}
+              style={[styles.button, styles.cancelButton, { backgroundColor: buttonBackgroundColor, borderColor: secondaryTextColor }]}
               onPress={onCancel}
               disabled={isDeleting}
             >
-              <Text style={styles.cancelButtonText}>Annuler</Text>
+              <Text style={[styles.cancelButtonText, { color: secondaryTextColor }]}>{t.deleteConfirm.cancel}</Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.button, styles.deleteButton, isDeleting && styles.deleteButtonDisabled]}
-              onPress={onConfirm}
-              disabled={isDeleting}
-            >
-              {isDeleting ? (
-                <ActivityIndicator color="#FFFFFF" />
-              ) : (
-                <Text style={styles.deleteButtonText}>Supprimer</Text>
-              )}
-            </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.button, { backgroundColor: accentOrange }, isDeleting && styles.deleteButtonDisabled]}
+                  onPress={onConfirm}
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? (
+                    <ActivityIndicator color={backgroundColor} />
+                  ) : (
+                    <Text style={[styles.deleteButtonText, { color: backgroundColor }]}>{t.deleteConfirm.confirm}</Text>
+                  )}
+                </TouchableOpacity>
           </View>
         </View>
       </View>
@@ -68,7 +78,6 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   modal: {
-    backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 24,
     width: '100%',
@@ -82,18 +91,15 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#111827',
     marginBottom: 12,
   },
   message: {
     fontSize: 16,
-    color: '#6B7280',
     marginBottom: 8,
     lineHeight: 24,
   },
   warning: {
     fontSize: 14,
-    color: '#EF4444',
     marginBottom: 24,
   },
   buttons: {
@@ -110,24 +116,18 @@ const styles = StyleSheet.create({
     minHeight: 44,
   },
   cancelButton: {
-    backgroundColor: '#F3F4F6',
     borderWidth: 1,
-    borderColor: '#D1D5DB',
   },
   cancelButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#6B7280',
   },
-  deleteButton: {
-    backgroundColor: '#EF4444',
-  },
+
   deleteButtonDisabled: {
     opacity: 0.6,
   },
   deleteButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#FFFFFF',
   },
 });
