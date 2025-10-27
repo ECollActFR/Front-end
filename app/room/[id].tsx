@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity, useWindowDimensions } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, useWindowDimensions } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LoadingSpinner, Button } from '@/components/atoms';
 import { ErrorMessage, AmenityChip, ConfirmDeleteModal, EquipmentItem } from '@/components/molecules';
 import { SensorCard, RoomEditModal } from '@/components/organisms';

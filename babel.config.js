@@ -1,3 +1,6 @@
+// Load environment variables before babel compilation
+require('./config/load-env');
+
 module.exports = function (api) {
   api.cache(true);
   return {

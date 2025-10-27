@@ -6,9 +6,11 @@ import { useRooms } from '@/hooks/useRooms';
 import { Room } from '@/types/room';
 import { useRouter } from 'expo-router';
 import React, { useMemo, useState } from 'react';
-import { FlatList, SafeAreaView, StyleSheet, Text, useWindowDimensions, View, Modal, TextInput, TouchableOpacity, Alert, ScrollView } from 'react-native';
+import { FlatList, StyleSheet, Text, useWindowDimensions, View, Modal, TextInput, TouchableOpacity, Alert, ScrollView, ActivityIndicator } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/useTranslation';
+import { IconSymbol } from '@/components/ui/icon-symbol';
 
 // Breakpoint for desktop layout
 const DESKTOP_BREAKPOINT = 768;
@@ -20,6 +22,7 @@ export default function HomeScreen() {
   const { width } = useWindowDimensions();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -30,6 +33,7 @@ export default function HomeScreen() {
   const secondaryTextColor = useThemeColor({}, 'icon');
   const tintColor = useThemeColor({}, 'tint');
   const borderColor = useThemeColor({}, 'border');
+  const cardBlue = useThemeColor({}, 'cardBlue');
 
   const { t } = useTranslation();
 
@@ -71,9 +75,20 @@ export default function HomeScreen() {
     }
   };
 
-  const renderRoom = ({ item }: { item: Room }) => (
+  const handleRefresh = async () => {
+    try {
+      setIsRefreshing(true);
+      await refetch();
+    } catch (error: any) {
+      Alert.alert(t.common.error, error.message || 'Failed to refresh data');
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  const renderRoom = ({ item, index }: { item: Room; index: number }) => (
     <View style={isDesktop ? styles.gridItem : styles.listItem}>
-      <RoomCard room={item} onPress={() => handleRoomPress(item.id)} />
+      <RoomCard room={item} onPress={() => handleRoomPress(item.id)} index={index} />
     </View>
   );
 
@@ -87,7 +102,7 @@ export default function HomeScreen() {
   if (isLoading) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor }]}>
-        <View style={[styles.header, { backgroundColor, borderBottomColor: borderColor }]}>
+        <View style={[styles.header, { backgroundColor: cardBlue, borderBottomColor: borderColor }]}>
           <View style={styles.headerContent}>
             <Text style={[styles.title, { color: textColor }]}>{t.home.title}</Text>
             <Text style={[styles.subtitle, { color: secondaryTextColor }]}>{t.home.subtitle}</Text>
@@ -102,7 +117,7 @@ export default function HomeScreen() {
   if (error) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor }]}>
-        <View style={[styles.header, { backgroundColor, borderBottomColor: borderColor }]}>
+        <View style={[styles.header, { backgroundColor: cardBlue, borderBottomColor: borderColor }]}>
           <View style={styles.headerContent}>
             <Text style={[styles.title, { color: textColor }]}>{t.home.title}</Text>
             <Text style={[styles.subtitle, { color: secondaryTextColor }]}>{t.home.subtitle}</Text>
@@ -119,20 +134,34 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor }]}>
       {/* Header */}
-      <View style={[styles.header, { backgroundColor, borderBottomColor: borderColor }]}>
+      <View style={[styles.header, { backgroundColor: cardBlue, borderBottomColor: borderColor }]}>
         <View style={styles.headerContent}>
           <View style={styles.headerTop}>
             <View>
               <Text style={[styles.title, { color: textColor }]}>{t.home.title}</Text>
               <Text style={[styles.subtitle, { color: secondaryTextColor }]}>{t.home.subtitle}</Text>
             </View>
-            <TouchableOpacity
-              style={[styles.addButton, { backgroundColor: tintColor }]}
-              onPress={() => setIsModalVisible(true)}
-              activeOpacity={0.8}
-            >
-              <Text style={[styles.addButtonText, { color: backgroundColor }]}>{t.home.addButton}</Text>
-            </TouchableOpacity>
+            <View style={styles.headerButtons}>
+              <TouchableOpacity
+                style={[styles.refreshButton, { backgroundColor: 'rgba(126, 159, 120, 0.15)' }]}
+                onPress={handleRefresh}
+                activeOpacity={0.7}
+                disabled={isRefreshing}
+              >
+                {isRefreshing ? (
+                  <ActivityIndicator size="small" color={tintColor} />
+                ) : (
+                  <IconSymbol name="arrow.clockwise" size={20} color={tintColor} />
+                )}
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.addButton, { backgroundColor: tintColor }]}
+                onPress={() => setIsModalVisible(true)}
+                activeOpacity={0.8}
+              >
+                <Text style={[styles.addButtonText, { color: '#FFFFFF' }]}>{t.home.addButton}</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
 
@@ -250,6 +279,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'flex-start',
   },
+  headerButtons: {
+    flexDirection: 'row',
+    gap: 8,
+    alignItems: 'center',
+  },
   title: {
     fontSize: 24,
     fontWeight: '700',
@@ -257,6 +291,13 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 14,
     marginTop: 2,
+  },
+  refreshButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   addButton: {
     paddingHorizontal: 16,

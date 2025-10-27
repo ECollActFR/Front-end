@@ -8,10 +8,14 @@ import { useThemeColor } from '@/hooks/use-theme-color';
 interface RoomCardProps {
   room: Room;
   onPress: () => void;
+  index?: number;
 }
 
-export default function RoomCard({ room, onPress }: RoomCardProps) {
-  const cardBackground = useThemeColor({}, 'cardGreen');
+export default function RoomCard({ room, onPress, index = 0 }: RoomCardProps) {
+  // Alternate between blue and green cards
+  const cardGreen = useThemeColor({}, 'cardGreen');
+  const cardBlue = useThemeColor({}, 'cardBlue');
+  const cardBackground = index % 2 === 0 ? cardBlue : cardGreen;
   const textColor = useThemeColor({}, 'text');
   const secondaryTextColor = useThemeColor({}, 'icon');
 

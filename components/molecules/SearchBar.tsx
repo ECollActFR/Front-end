@@ -15,7 +15,8 @@ export default function SearchBar({
   placeholder = 'Rechercher...',
 }: SearchBarProps) {
   const backgroundColor = useThemeColor({}, 'background');
-  const borderColor = useThemeColor({}, 'icon');
+  const textColor = useThemeColor({}, 'text');
+  const borderColor = textColor; // Use blue border instead of green
 
   return (
     <View style={[styles.container, { backgroundColor, borderColor }]}>
