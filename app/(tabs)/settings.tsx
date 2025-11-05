@@ -40,6 +40,7 @@ export default function SettingsScreen() {
 
       {/* Settings Content */}
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+
         {/* Appearance Section */}
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: textColor }]}>{t.settings.appearance}</Text>

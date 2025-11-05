@@ -2,6 +2,7 @@
  * API service with error handling and timeout
  */
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_CONFIG } from '@/constants/config';
 import { ApiError } from '@/types/room';
 
@@ -15,24 +16,48 @@ class ApiService {
   }
 
   /**
+   * Get stored JWT token from AsyncStorage
+   */
+  private async getStoredToken(): Promise<string | null> {
+    try {
+      return await AsyncStorage.getItem('token');
+    } catch (error) {
+      console.error('Error retrieving token:', error);
+      return null;
+    }
+  }
+
+  /**
    * Generic fetch with timeout and error handling
    */
   private async fetchWithTimeout(
     url: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
+    contentType: string = 'application/ld+json',
+    token?: string
   ): Promise<Response> {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+
+    const headers: Record<string, string> = {
+      'Content-Type': contentType,
+      'Accept': contentType,
+      ...(options.headers as Record<string, string>),
+    };
+
+    // Get token from parameter or from storage
+    const authToken = token || await this.getStoredToken();
+
+    // Add Authorization header if token is available
+    if (authToken) {
+      headers['Authorization'] = `Bearer ${authToken}`;
+    }
 
     try {
       const response = await fetch(url, {
         ...options,
         signal: controller.signal,
-        headers: {
-          'Content-Type': 'application/ld+json',
-          'Accept': 'application/ld+json',
-          ...options.headers,
-        },
+        headers,
       });
 
       clearTimeout(timeoutId);
@@ -65,33 +90,33 @@ class ApiService {
   /**
    * GET request
    */
-  async get<T>(endpoint: string): Promise<T> {
+  async get<T>(endpoint: string, contentType?: string, token?: string): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
-    const response = await this.fetchWithTimeout(url, { method: 'GET' });
+    const response = await this.fetchWithTimeout(url, { method: 'GET' }, contentType, token);
     return response.json();
   }
 
   /**
    * POST request
    */
-  async post<T>(endpoint: string, data: any): Promise<T> {
+  async post<T>(endpoint: string, data: any, contentType?: string, token?: string): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
     const response = await this.fetchWithTimeout(url, {
       method: 'POST',
       body: JSON.stringify(data),
-    });
+    }, contentType, token);
     return response.json();
   }
 
   /**
    * PUT request
    */
-  async put<T>(endpoint: string, data: any): Promise<T> {
+  async put<T>(endpoint: string, data: any, contentType?: string, token?: string): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
     const response = await this.fetchWithTimeout(url, {
       method: 'PUT',
       body: JSON.stringify(data),
-    });
+    }, contentType, token);
     return response.json();
   }
 
@@ -108,6 +133,7 @@ class ApiService {
     return text ? JSON.parse(text) : ({} as T);
   }
 }
+
 
 // Singleton instance
 export const apiService = new ApiService(API_CONFIG.BASE_URL, API_CONFIG.TIMEOUT);

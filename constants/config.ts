@@ -47,4 +47,8 @@ export const ENDPOINTS = {
   ROOM_UPDATE: (roomId: number) => `/rooms/${roomId}`,
   ROOM_DELETE: (roomId: number) => `/rooms/${roomId}`,
   CAPTURE_TYPES: '/capture_types',
+  USER_VALIDATE: '/auth/validate',
+  LOGIN: '/api/login_check',
+  USER_INFO: '/users/me',
+  USER_UPDATE: '/users/me'
 } as const;

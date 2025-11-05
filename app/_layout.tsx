@@ -1,24 +1,26 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
+import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { Platform } from 'react-native';
+import { ActivityIndicator, Platform, View } from 'react-native';
+import { useEffect } from 'react';
+
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { Colors } from '@/constants/theme';
+import { ThemeProvider as CustomThemeProvider } from '@/contexts/ThemeContext';
+import { LanguageProvider } from '@/contexts/LanguageContext';
+import { AuthProvider, useAuth } from '@/contexts/AuthContext'; // ← À créer (voir explication plus bas)
 
 // Only import react-native-reanimated on native platforms
 if (Platform.OS !== 'web') {
   require('react-native-reanimated');
 }
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
-import { Colors } from '@/constants/theme';
-import { ThemeProvider as CustomThemeProvider } from '@/contexts/ThemeContext';
-import { LanguageProvider } from '@/contexts/LanguageContext';
-
 export const unstable_settings = {
   anchor: '(tabs)',
 };
 
-// Custom theme based on our color palette
+// ---- Thèmes custom ----
 const LightNavigationTheme = {
   ...DefaultTheme,
   colors: {
@@ -45,6 +47,38 @@ const DarkNavigationTheme = {
   },
 };
 
+// ---- AuthGuard ----
+function AuthGuard({ children }: { children: React.ReactNode }) {
+  const { token, isLoading } = useAuth();
+  const router = useRouter();
+  const segments = useSegments();
+
+  useEffect(() => {
+    if (isLoading) return;
+
+    // Routes protégées
+    const protectedRoutes = ['(tabs)', 'settings', 'index']; // ajuste selon ton arborescence
+    const currentRoute = segments.join('/');
+
+    const isProtected = protectedRoutes.some((r) => currentRoute.startsWith(r));
+
+    if (isProtected && !token) {
+      router.replace('/sign-in');
+    }
+  }, [segments, token, isLoading]);
+
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
+  return <>{children}</>;
+}
+
+// ---- Layout principal ----
 function RootLayoutContent() {
   const colorScheme = useColorScheme();
 
@@ -52,14 +86,11 @@ function RootLayoutContent() {
     <SafeAreaProvider>
       <ThemeProvider value={colorScheme === 'dark' ? DarkNavigationTheme : LightNavigationTheme}>
         <Stack>
+          {/* Routes */}
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-          <Stack.Screen
-            name="room/[id]"
-            options={{
-              headerShown: false,
-            }}
-          />
+          <Stack.Screen name="room/[id]" options={{ headerShown: false }} />
+          <Stack.Screen name="sign-in" options={{ headerShown: false }} />
         </Stack>
         <StatusBar style="auto" />
       </ThemeProvider>
@@ -67,11 +98,16 @@ function RootLayoutContent() {
   );
 }
 
+// ---- Composition globale ----
 export default function RootLayout() {
   return (
     <LanguageProvider>
       <CustomThemeProvider>
-        <RootLayoutContent />
+        <AuthProvider>
+          <AuthGuard>
+            <RootLayoutContent />
+          </AuthGuard>
+        </AuthProvider>
       </CustomThemeProvider>
     </LanguageProvider>
   );

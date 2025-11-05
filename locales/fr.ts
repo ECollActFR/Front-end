@@ -3,6 +3,7 @@ export const fr = {
   nav: {
     home: 'Accueil',
     settings: 'Paramètres',
+    user:'Utilisateur'
   },
 
   // Home screen
@@ -15,6 +16,23 @@ export const fr = {
     loading: 'Chargement...',
     error: 'Une erreur est survenue',
     retry: 'Réessayer',
+  },
+
+  user: {
+    title: 'Mon Profil',
+    subtitle: 'Vos informations personnelles',
+    loading: 'Chargement...',
+    error: 'Erreur lors du chargement',
+    retry: 'Réessayer',
+    username: 'Nom d\'utilisateur',
+    email: 'Email',
+    roles: 'Rôles',
+    createdAt: 'Créé le',
+    editProfile: 'Modifier le profil',
+    logout: 'Se déconnecter',
+    logoutConfirm: 'Êtes-vous sûr de vouloir vous déconnecter ?',
+    cancel: 'Annuler',
+    confirm: 'Confirmer',
   },
 
   // Add room modal
@@ -73,6 +91,11 @@ export const fr = {
   settings: {
     title: 'Paramètres',
     subtitle: 'Personnalisez votre expérience',
+
+    // User Section
+    user: 'Utilisateur',
+    email: 'Adresse mail',
+
 
     // Appearance section
     appearance: 'Apparence',
