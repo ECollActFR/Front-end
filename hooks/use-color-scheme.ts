@@ -1,5 +1,5 @@
-import { useColorScheme as useColorSchemeFromStore } from '@/store/settingsStore';
+import { useColorScheme as useColorSchemeFromContext } from '@/contexts/SettingsContext';
 
 export function useColorScheme() {
-  return useColorSchemeFromStore();
+  return useColorSchemeFromContext();
 }

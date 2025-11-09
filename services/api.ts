@@ -4,7 +4,7 @@
 
 import { API_CONFIG } from '@/constants/config';
 import { ApiError } from '@/types/room';
-import useUserStore from '@/store/userStore';
+import { tokenManager } from '@/services/tokenManager';
 
 class ApiService {
   private baseURL: string;
@@ -16,10 +16,10 @@ class ApiService {
   }
 
   /**
-   * Get stored JWT token from Zustand store
+   * Get stored JWT token from token manager
    */
   private getStoredToken(): string | null {
-    return useUserStore.getState().token;
+    return tokenManager.getToken();
   }
 
   /**

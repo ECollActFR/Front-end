@@ -7,7 +7,8 @@ import { useEffect } from 'react';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
-import useUserStore from '@/store/userStore';
+import { useUser, UserProvider } from '@/contexts/UserContext';
+import { SettingsProvider } from '@/contexts/SettingsContext';
 
 // Only import react-native-reanimated on native platforms
 if (Platform.OS !== 'web') {
@@ -47,10 +48,7 @@ const DarkNavigationTheme = {
 
 // ---- AuthGuard ----
 function AuthGuard({ children }: { children: React.ReactNode }) {
-  const token = useUserStore((state) => state.token);
-  const isLoading = useUserStore((state) => state.isLoading);
-  const validateToken = useUserStore((state) => state.validateToken);
-  const loadUserInfo = useUserStore((state) => state.loadUserInfo);
+  const { token, isLoading, validateToken, loadUserInfo } = useUser();
   const router = useRouter();
   const segments = useSegments();
 
@@ -115,8 +113,12 @@ function RootLayoutContent() {
 // ---- Composition globale ----
 export default function RootLayout() {
   return (
-    <AuthGuard>
-      <RootLayoutContent />
-    </AuthGuard>
+    <SettingsProvider>
+      <UserProvider>
+        <AuthGuard>
+          <RootLayoutContent />
+        </AuthGuard>
+      </UserProvider>
+    </SettingsProvider>
   );
 }

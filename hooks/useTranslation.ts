@@ -1,9 +1,8 @@
-import useSettingsStore from '@/store/settingsStore';
+import { useSettings } from '@/contexts/SettingsContext';
 import { getTranslation } from '@/locales';
 
 export function useTranslation() {
-  const language = useSettingsStore((state) => state.language);
-  const setLanguage = useSettingsStore((state) => state.setLanguage);
+  const { language, setLanguage } = useSettings();
   const t = getTranslation(language);
 
   // Helper function to replace placeholders like {{count}}

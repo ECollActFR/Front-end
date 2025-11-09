@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useThemeColor } from '@/hooks/use-theme-color';
-import useSettingsStore, { ThemePreference, Language, useColorScheme } from '@/store/settingsStore';
+import { useSettings, useColorScheme, ThemePreference, Language } from '@/contexts/SettingsContext';
 import { useTranslation } from '@/hooks/useTranslation';
 
 export default function SettingsScreen() {
@@ -14,8 +14,7 @@ export default function SettingsScreen() {
   const tintColor = useThemeColor({}, 'tint');
 
   const colorScheme = useColorScheme();
-  const themePreference = useSettingsStore((state) => state.themePreference);
-  const setThemePreference = useSettingsStore((state) => state.setThemePreference);
+  const { themePreference, setThemePreference } = useSettings();
   const { t, language, setLanguage } = useTranslation();
 
   const themeOptions: { value: ThemePreference; label: string; description: string }[] = [

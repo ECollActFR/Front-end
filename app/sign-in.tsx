@@ -12,7 +12,7 @@ import {
   useColorScheme,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import useUserStore from '@/store/userStore';
+import { useUser } from '@/contexts/UserContext';
 import { userService } from '@/services/userService';
 import { Colors } from '@/constants/theme';
 
@@ -21,8 +21,7 @@ export default function SignInScreen() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const login = useUserStore((state) => state.login);
-  const loadUserInfo = useUserStore((state) => state.loadUserInfo);
+  const { login, loadUserInfo } = useUser();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
 
