@@ -7,9 +7,7 @@ import { useEffect } from 'react';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
-import { ThemeProvider as CustomThemeProvider } from '@/contexts/ThemeContext';
-import { LanguageProvider } from '@/contexts/LanguageContext';
-import { AuthProvider, useAuth } from '@/contexts/AuthContext'; // ← À créer (voir explication plus bas)
+import useUserStore from '@/store/userStore';
 
 // Only import react-native-reanimated on native platforms
 if (Platform.OS !== 'web') {
@@ -49,15 +47,31 @@ const DarkNavigationTheme = {
 
 // ---- AuthGuard ----
 function AuthGuard({ children }: { children: React.ReactNode }) {
-  const { token, isLoading } = useAuth();
+  const token = useUserStore((state) => state.token);
+  const isLoading = useUserStore((state) => state.isLoading);
+  const validateToken = useUserStore((state) => state.validateToken);
+  const loadUserInfo = useUserStore((state) => state.loadUserInfo);
   const router = useRouter();
   const segments = useSegments();
+
+  // Valider le token au démarrage
+  useEffect(() => {
+    const initAuth = async () => {
+      if (token) {
+        const isValid = await validateToken();
+        if (isValid) {
+          await loadUserInfo();
+        }
+      }
+    };
+    initAuth();
+  }, []);
 
   useEffect(() => {
     if (isLoading) return;
 
     // Routes protégées
-    const protectedRoutes = ['(tabs)', 'settings', 'index']; // ajuste selon ton arborescence
+    const protectedRoutes = ['(tabs)', 'settings', 'index'];
     const currentRoute = segments.join('/');
 
     const isProtected = protectedRoutes.some((r) => currentRoute.startsWith(r));
@@ -101,14 +115,8 @@ function RootLayoutContent() {
 // ---- Composition globale ----
 export default function RootLayout() {
   return (
-    <LanguageProvider>
-      <CustomThemeProvider>
-        <AuthProvider>
-          <AuthGuard>
-            <RootLayoutContent />
-          </AuthGuard>
-        </AuthProvider>
-      </CustomThemeProvider>
-    </LanguageProvider>
+    <AuthGuard>
+      <RootLayoutContent />
+    </AuthGuard>
   );
 }

@@ -1,6 +1,6 @@
 import { fr } from './fr';
 import { en } from './en';
-import { Language } from '@/contexts/LanguageContext';
+import { Language } from '@/store/settingsStore';
 
 export const translations = {
   fr,

@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router';
 
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/useTranslation';
-import { useAuth } from '@/contexts/AuthContext';
+import useUserStore from '@/store/userStore';
 import { userService } from '@/services/userService';
 import { User } from '@/types/user';
 
@@ -19,38 +19,39 @@ export default function UserScreen() {
     const accentOrange = useThemeColor({}, 'accentOrange');
 
     const { t } = useTranslation();
-    const { token, signOut } = useAuth();
+    const token = useUserStore((state) => state.token);
+    const user = useUserStore((state) => state.user);
+    const logout = useUserStore((state) => state.logout);
+    const loadUserInfo = useUserStore((state) => state.loadUserInfo);
     const router = useRouter();
 
-    const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isLogoutHovered, setIsLogoutHovered] = useState(false);
 
     // Load user info on mount
     useEffect(() => {
-        loadUserInfo();
+        const fetchUserInfo = async () => {
+            if (!token) {
+                router.replace('/sign-in');
+                return;
+            }
+
+            setIsLoading(true);
+            setError(null);
+
+            try {
+                await loadUserInfo();
+            } catch (err: any) {
+                console.error('Error loading user info:', err);
+                setError(err?.message || 'Failed to load user info');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchUserInfo();
     }, [token]);
-
-    const loadUserInfo = async () => {
-        if (!token) {
-            router.replace('/sign-in');
-            return;
-        }
-
-        setIsLoading(true);
-        setError(null);
-
-        try {
-            const userData = await userService.getUserInfo(token);
-            setUser(userData);
-        } catch (err: any) {
-            console.error('Error loading user info:', err);
-            setError(err?.message || 'Failed to load user info');
-        } finally {
-            setIsLoading(false);
-        }
-    };
 
     const handleLogout = () => {
         Alert.alert(
@@ -64,8 +65,8 @@ export default function UserScreen() {
                 {
                     text: t.user.confirm,
                     style: 'destructive',
-                    onPress: async () => {
-                        await signOut();
+                    onPress: () => {
+                        logout();
                         router.replace('/sign-in');
                     },
                 },
@@ -117,7 +118,21 @@ export default function UserScreen() {
                             </Text>
                             <TouchableOpacity
                                 style={[styles.retryButton, { backgroundColor: tintColor }]}
-                                onPress={loadUserInfo}
+                                onPress={() => {
+                                    const fetchUserInfo = async () => {
+                                        setIsLoading(true);
+                                        setError(null);
+                                        try {
+                                            await loadUserInfo();
+                                        } catch (err: any) {
+                                            console.error('Error loading user info:', err);
+                                            setError(err?.message || 'Failed to load user info');
+                                        } finally {
+                                            setIsLoading(false);
+                                        }
+                                    };
+                                    fetchUserInfo();
+                                }}
                             >
                                 <Text style={styles.retryButtonText}>{t.user.retry}</Text>
                             </TouchableOpacity>

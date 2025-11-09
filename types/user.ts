@@ -12,10 +12,7 @@ export interface LoginCredentials {
 }
 
 export interface LoginResponse {
-    data: {
-        token: string
-    }
-    success: boolean;
+    token: string
 }
 
 export interface User {
@@ -24,6 +21,9 @@ export interface User {
     email: string;
     roles: string[];
     createdAt?: string;
+    isEmailVerified: boolean;
+    firstname: string;
+    lastname: string
 }
 
 export interface UserInfoResponse {

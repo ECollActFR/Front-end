@@ -12,7 +12,7 @@ import {
   useColorScheme,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useAuth } from '@/contexts/AuthContext';
+import useUserStore from '@/store/userStore';
 import { userService } from '@/services/userService';
 import { Colors } from '@/constants/theme';
 
@@ -21,7 +21,8 @@ export default function SignInScreen() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const { signIn } = useAuth();
+  const login = useUserStore((state) => state.login);
+  const loadUserInfo = useUserStore((state) => state.loadUserInfo);
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
 
@@ -41,8 +42,14 @@ export default function SignInScreen() {
         password: password.trim(),
       });
 
-      // Save token with auth context
-      await signIn(response.data.token);
+      // Get user info first
+      const user = await userService.getUserInfo(response.token);
+
+      // Save token and user with userStore
+      login(user, response.token);
+
+      // Load additional user info if needed
+      await loadUserInfo();
 
       // Navigate to home
       router.replace('/(tabs)');

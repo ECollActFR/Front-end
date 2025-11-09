@@ -1,6 +1,5 @@
-import { useTheme } from '@/contexts/ThemeContext';
+import { useColorScheme as useColorSchemeFromStore } from '@/store/settingsStore';
 
 export function useColorScheme() {
-  const { colorScheme } = useTheme();
-  return colorScheme;
+  return useColorSchemeFromStore();
 }

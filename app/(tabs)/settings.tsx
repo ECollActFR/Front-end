@@ -2,9 +2,8 @@ import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useThemeColor } from '@/hooks/use-theme-color';
-import { useTheme, ThemePreference } from '@/contexts/ThemeContext';
+import useSettingsStore, { ThemePreference, Language, useColorScheme } from '@/store/settingsStore';
 import { useTranslation } from '@/hooks/useTranslation';
-import { Language } from '@/contexts/LanguageContext';
 
 export default function SettingsScreen() {
   const backgroundColor = useThemeColor({}, 'background');
@@ -14,7 +13,9 @@ export default function SettingsScreen() {
   const cardBackground = useThemeColor({}, 'cardNeutral');
   const tintColor = useThemeColor({}, 'tint');
 
-  const { colorScheme, themePreference, setThemePreference } = useTheme();
+  const colorScheme = useColorScheme();
+  const themePreference = useSettingsStore((state) => state.themePreference);
+  const setThemePreference = useSettingsStore((state) => state.setThemePreference);
   const { t, language, setLanguage } = useTranslation();
 
   const themeOptions: { value: ThemePreference; label: string; description: string }[] = [

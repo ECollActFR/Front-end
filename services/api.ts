@@ -2,9 +2,9 @@
  * API service with error handling and timeout
  */
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_CONFIG } from '@/constants/config';
 import { ApiError } from '@/types/room';
+import useUserStore from '@/store/userStore';
 
 class ApiService {
   private baseURL: string;
@@ -16,15 +16,10 @@ class ApiService {
   }
 
   /**
-   * Get stored JWT token from AsyncStorage
+   * Get stored JWT token from Zustand store
    */
-  private async getStoredToken(): Promise<string | null> {
-    try {
-      return await AsyncStorage.getItem('token');
-    } catch (error) {
-      console.error('Error retrieving token:', error);
-      return null;
-    }
+  private getStoredToken(): string | null {
+    return useUserStore.getState().token;
   }
 
   /**
@@ -46,7 +41,7 @@ class ApiService {
     };
 
     // Get token from parameter or from storage
-    const authToken = token || await this.getStoredToken();
+    const authToken = token || this.getStoredToken();
 
     // Add Authorization header if token is available
     if (authToken) {

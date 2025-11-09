@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useTheme } from '@/contexts/ThemeContext';
+import { useColorScheme as useColorSchemeFromStore } from '@/store/settingsStore';
 
 /**
  * To support static rendering, this value needs to be re-calculated on the client side for web
@@ -11,7 +11,7 @@ export function useColorScheme() {
     setHasHydrated(true);
   }, []);
 
-  const { colorScheme } = useTheme();
+  const colorScheme = useColorSchemeFromStore();
 
   if (hasHydrated) {
     return colorScheme;
