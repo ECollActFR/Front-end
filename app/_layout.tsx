@@ -4,11 +4,13 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ActivityIndicator, Platform, View } from 'react-native';
 import { useEffect } from 'react';
+import { QueryClientProvider } from '@tanstack/react-query';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
-import { useUser, UserProvider } from '@/contexts/UserContext';
+import { useAuth, AuthProvider } from '@/contexts/AuthContext';
 import { SettingsProvider } from '@/contexts/SettingsContext';
+import { queryClient } from '@/config/queryClient';
 
 // Only import react-native-reanimated on native platforms
 if (Platform.OS !== 'web') {
@@ -48,22 +50,9 @@ const DarkNavigationTheme = {
 
 // ---- AuthGuard ----
 function AuthGuard({ children }: { children: React.ReactNode }) {
-  const { token, isLoading, validateToken, loadUserInfo } = useUser();
+  const { token, isLoading } = useAuth();
   const router = useRouter();
   const segments = useSegments();
-
-  // Valider le token au démarrage
-  useEffect(() => {
-    const initAuth = async () => {
-      if (token) {
-        const isValid = await validateToken();
-        if (isValid) {
-          await loadUserInfo();
-        }
-      }
-    };
-    initAuth();
-  }, []);
 
   useEffect(() => {
     if (isLoading) return;
@@ -100,7 +89,6 @@ function RootLayoutContent() {
         <Stack>
           {/* Routes */}
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
           <Stack.Screen name="room/[id]" options={{ headerShown: false }} />
           <Stack.Screen name="sign-in" options={{ headerShown: false }} />
         </Stack>
@@ -113,12 +101,14 @@ function RootLayoutContent() {
 // ---- Composition globale ----
 export default function RootLayout() {
   return (
-    <SettingsProvider>
-      <UserProvider>
-        <AuthGuard>
-          <RootLayoutContent />
-        </AuthGuard>
-      </UserProvider>
-    </SettingsProvider>
+    <QueryClientProvider client={queryClient}>
+      <SettingsProvider>
+        <AuthProvider>
+          <AuthGuard>
+            <RootLayoutContent />
+          </AuthGuard>
+        </AuthProvider>
+      </SettingsProvider>
+    </QueryClientProvider>
   );
 }

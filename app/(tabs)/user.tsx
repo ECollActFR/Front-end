@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router';
 
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/useTranslation';
-import { useUser } from '@/contexts/UserContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { userService } from '@/services/userService';
 import { User } from '@/types/user';
 
@@ -19,7 +19,7 @@ export default function UserScreen() {
     const accentOrange = useThemeColor({}, 'accentOrange');
 
     const { t } = useTranslation();
-    const { token, user, logout, loadUserInfo } = useUser();
+    const { token, user, logout, loadUserInfo } = useAuth();
     const router = useRouter();
 
     const [isLoading, setIsLoading] = useState(true);

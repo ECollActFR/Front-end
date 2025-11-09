@@ -1,58 +1,108 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { userService } from "@/services/userService";
+/**
+ * Auth Context - Simple wrapper around TanStack Query auth hooks
+ * Provides a clean API for authentication throughout the app
+ */
 
-type AuthContextType = {
+import React, { createContext, useContext, ReactNode } from 'react';
+import { User, LoginCredentials } from '@/types/user';
+import {
+  useAuthState,
+  useLoginMutation,
+  useLogoutMutation,
+  useLoadUserInfoMutation,
+  useUpdateUserMutation,
+  useValidateToken,
+} from '@/hooks/queries/useAuthQuery';
+
+interface AuthContextType {
+  // State
+  user: User | null;
   token: string | null;
+  isAuthenticated: boolean;
   isLoading: boolean;
-  signIn: (token: string) => Promise<void>;
-  signOut: () => Promise<void>;
-};
 
-const AuthContext = createContext<AuthContextType>({
-  token: null,
-  isLoading: true,
-  signIn: async () => {},
-  signOut: async () => {},
-});
+  // Actions
+  login: (credentials: LoginCredentials) => Promise<void>;
+  logout: () => Promise<void>;
+  loadUserInfo: () => Promise<void>;
+  updateUser: (payload: any) => Promise<void>;
 
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [token, setToken] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  // Mutation states
+  isLoginPending: boolean;
+  isLogoutPending: boolean;
+  isLoadingUserInfo: boolean;
+  isUpdatingUser: boolean;
+}
 
-  // Chargement du token au démarrage
-  useEffect(() => {
-    const loadToken = async () => {
-      const stored = await AsyncStorage.getItem("token");
-      if (stored) {
-        // Vérifie s’il est valide avant de le garder
-        const isValid = await userService.validateToken({token: stored});
-        if (isValid) {
-          setToken(stored);
-        } else {
-          await AsyncStorage.removeItem("token");
-        }
-      }
-      setIsLoading(false);
-    };
-    loadToken();
-  }, []);
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-  const signIn = async (newToken: string) => {
-    await AsyncStorage.setItem("token", newToken);
-    setToken(newToken);
-  };
+export function AuthProvider({ children }: { children: ReactNode }) {
+  // Get auth state from TanStack Query
+  const { data: authState, isLoading: isLoadingAuth } = useAuthState();
 
-  const signOut = async () => {
-    await AsyncStorage.removeItem("token");
-    setToken(null);
-  };
-
-  return (
-    <AuthContext.Provider value={{ token, isLoading, signIn, signOut }}>
-      {children}
-    </AuthContext.Provider>
+  // Validate token on startup
+  const { isLoading: isValidating } = useValidateToken(
+    authState?.token || null,
+    !!authState?.token
   );
-};
 
-export const useAuth = () => useContext(AuthContext);
+  // Mutations
+  const loginMutation = useLoginMutation();
+  const logoutMutation = useLogoutMutation();
+  const loadUserInfoMutation = useLoadUserInfoMutation();
+  const updateUserMutation = useUpdateUserMutation();
+
+  // Actions
+  const login = async (credentials: LoginCredentials) => {
+    await loginMutation.mutateAsync(credentials);
+  };
+
+  const logout = async () => {
+    await logoutMutation.mutateAsync();
+  };
+
+  const loadUserInfo = async () => {
+    if (authState?.token) {
+      await loadUserInfoMutation.mutateAsync(authState.token);
+    }
+  };
+
+  const updateUser = async (payload: any) => {
+    if (authState?.token) {
+      await updateUserMutation.mutateAsync({ token: authState.token, payload });
+    }
+  };
+
+  const value: AuthContextType = {
+    // State
+    user: authState?.user || null,
+    token: authState?.token || null,
+    isAuthenticated: authState?.isAuthenticated || false,
+    isLoading: isLoadingAuth || isValidating,
+
+    // Actions
+    login,
+    logout,
+    loadUserInfo,
+    updateUser,
+
+    // Mutation states
+    isLoginPending: loginMutation.isPending,
+    isLogoutPending: logoutMutation.isPending,
+    isLoadingUserInfo: loadUserInfoMutation.isPending,
+    isUpdatingUser: updateUserMutation.isPending,
+  };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+/**
+ * Hook to access auth context
+ */
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+}

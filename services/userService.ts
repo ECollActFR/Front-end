@@ -20,7 +20,7 @@ export const userService = {
         'application/json'
       );
 
-      if (response?.token) {
+      if (!response?.data?.token) {
         throw new Error('Invalid login response');
       }
 

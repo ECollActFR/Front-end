@@ -28,7 +28,6 @@ Uses Expo Router with file-based routing. Files in the `app/` directory automati
 - `app/(tabs)/_layout.tsx` - Tab bar layout with bottom tabs
 - `app/(tabs)/index.tsx` - Home screen (default route)
 - `app/(tabs)/explore.tsx` - Explore screen
-- `app/modal.tsx` - Modal screen
 
 The root layout sets `unstable_settings.anchor = '(tabs)'` to anchor navigation to the tabs group.
 

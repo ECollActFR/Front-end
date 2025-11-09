@@ -12,16 +12,15 @@ import {
   useColorScheme,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useUser } from '@/contexts/UserContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { userService } from '@/services/userService';
 import { Colors } from '@/constants/theme';
 
 export default function SignInScreen() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const { login, loadUserInfo } = useUser();
+  const { login, isLoginPending } = useAuth();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
 
@@ -32,23 +31,12 @@ export default function SignInScreen() {
       return;
     }
 
-    setIsLoading(true);
-
     try {
-      // Call login API
-      const response = await userService.login({
+      // Call login with TanStack Query
+      await login({
         username: username.trim(),
         password: password.trim(),
       });
-
-      // Get user info first
-      const user = await userService.getUserInfo(response.token);
-
-      // Save token and user with userStore
-      login(user, response.token);
-
-      // Load additional user info if needed
-      await loadUserInfo();
 
       // Navigate to home
       router.replace('/(tabs)');
@@ -61,8 +49,6 @@ export default function SignInScreen() {
         : 'Erreur de connexion. Veuillez réessayer.';
 
       Alert.alert('Erreur de connexion', errorMessage);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -104,7 +90,7 @@ export default function SignInScreen() {
                 onChangeText={setUsername}
                 autoCapitalize="none"
                 autoCorrect={false}
-                editable={!isLoading}
+                editable={!isLoginPending}
               />
             </View>
 
@@ -128,7 +114,7 @@ export default function SignInScreen() {
                 secureTextEntry
                 autoCapitalize="none"
                 autoCorrect={false}
-                editable={!isLoading}
+                editable={!isLoginPending}
               />
             </View>
 
@@ -136,12 +122,12 @@ export default function SignInScreen() {
               style={[
                 styles.button,
                 { backgroundColor: colors.tint },
-                isLoading && styles.buttonDisabled,
+                isLoginPending && styles.buttonDisabled,
               ]}
               onPress={handleSignIn}
-              disabled={isLoading}
+              disabled={isLoginPending}
             >
-              {isLoading ? (
+              {isLoginPending ? (
                 <ActivityIndicator color="#FFFFFF" />
               ) : (
                 <Text style={styles.buttonText}>Se connecter</Text>

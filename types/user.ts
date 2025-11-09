@@ -12,7 +12,10 @@ export interface LoginCredentials {
 }
 
 export interface LoginResponse {
-    token: string
+    success: boolean;
+    data: {
+        token: string;
+    };
 }
 
 export interface User {
