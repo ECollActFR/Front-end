@@ -236,7 +236,7 @@ L'application se connecte à l'API Neutria Backend. Assurez-vous que :
 Endpoints utilisés :
 - `GET /api/rooms` - Liste des salles
 - `GET /api/rooms/{id}` - Détail d'une salle
-- `GET /api/rooms/{id}/last` - Salle avec dernières captures
+- `GET /api/rooms/{id}/lastCaptures` - Salle avec dernières captures
 - `POST /api/rooms` - Création d'une salle
 - `PUT /api/rooms/{id}` - Modification d'une salle
 - `DELETE /api/rooms/{id}` - Suppression d'une salle

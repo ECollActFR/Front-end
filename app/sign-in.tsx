@@ -73,7 +73,7 @@ export default function SignInScreen() {
           <View style={styles.form}>
             <View style={styles.inputContainer}>
               <Text style={[styles.label, { color: colors.textSecondary }]}>
-                Nom d'utilisateur
+                Nom d&apos;utilisateur
               </Text>
               <TextInput
                 style={[
@@ -84,7 +84,7 @@ export default function SignInScreen() {
                     borderColor: colors.border,
                   },
                 ]}
-                placeholder="Entrez votre nom d'utilisateur"
+                placeholder="Entrez votre nom d&apos;utilisateur"
                 placeholderTextColor={colors.textSecondary + '80'}
                 value={username}
                 onChangeText={setUsername}

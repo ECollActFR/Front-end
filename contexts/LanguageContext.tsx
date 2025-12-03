@@ -6,6 +6,7 @@ export type Language = 'fr' | 'en';
 type LanguageContextType = {
   language: Language;
   setLanguage: (lang: Language) => void;
+  resetLanguage: () => void;
 };
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -43,12 +44,21 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const resetLanguage = async () => {
+    try {
+      setLanguageState('fr'); // Langue par défaut
+      await AsyncStorage.removeItem(LANGUAGE_STORAGE_KEY);
+    } catch (error) {
+      console.error('Error resetting language:', error);
+    }
+  };
+
   if (isLoading) {
     return null;
   }
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage }}>
+    <LanguageContext.Provider value={{ language, setLanguage, resetLanguage }}>
       {children}
     </LanguageContext.Provider>
   );

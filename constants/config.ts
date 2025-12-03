@@ -42,7 +42,7 @@ export const API_CONFIG = {
 export const ENDPOINTS = {
   ROOMS: '/rooms',
   ROOM_CREATE: '/rooms',
-  ROOM_DETAIL: (roomId: number) => `/rooms/${roomId}/last`,
+  ROOM_DETAIL: (roomId: number) => `/rooms/${roomId}/lastCaptures`,
   ROOM: (roomId: number) => `/rooms/${roomId}`,
   ROOM_UPDATE: (roomId: number) => `/rooms/${roomId}`,
   ROOM_DELETE: (roomId: number) => `/rooms/${roomId}`,
@@ -50,5 +50,10 @@ export const ENDPOINTS = {
   USER_VALIDATE: '/auth/validate',
   LOGIN: '/api/login_check',
   USER_INFO: '/users/me',
-  USER_UPDATE: '/users/me'
+  USER_UPDATE: '/users/me',
+  LOGOUT: '/auth/logout',
+  ACQUISITION_SYSTEMS: '/acquisition_systems',
+  ACQUISITION_SYSTEM: (id: number) => `/acquisition_systems/${id}`,
+  ACQUISITION_SYSTEM_CONFIG: (id: number) => `/acquisition_systems/${id}/configuration`,
+  ACQUISITION_SYSTEM_UPDATE: (id: number) => `/acquisition_systems/${id}`,
 } as const;

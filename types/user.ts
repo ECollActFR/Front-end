@@ -39,3 +39,9 @@ export interface UpdateUserPayload {
     email?: string;
     password?: string;
 }
+
+export interface AuthError {
+    message: string;
+    status: number;
+    isAuthError: boolean;
+}

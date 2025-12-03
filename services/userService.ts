@@ -5,7 +5,7 @@
 import { apiService } from './api';
 import { ENDPOINTS } from '@/constants/config';
 import { Room, HydraCollection, ApiRoom, RoomDetailResponse, RoomDetail, RoomUpdatePayload, ApiCaptureType, ApiRoomWithCaptureTypes } from '@/types/room';
-import { ApiValidateToken, ValidateToken, LoginCredentials, LoginResponse, UserInfoResponse, User, UpdateUserPayload } from '@/types/user';
+import { ApiValidateToken, ValidateToken, LoginCredentials, LoginResponse, UserInfoResponse, User, UpdateUserPayload, AuthError } from '@/types/user';
 import { mapApiRoomsToRooms, mapApiRoomToRoom } from '@/utils/roomMapper';
 
 export const userService = {
@@ -41,12 +41,17 @@ export const userService = {
 
       // Validate response format
       if (!response || !response.success) {
-        throw new Error('Invalid API response format');
+        const authError: AuthError = {
+          message: 'Token validation failed',
+          status: 401,
+          isAuthError: true
+        };
+        throw authError;
       }
       const success = response.success;
       return success;
     } catch (error) {
-      console.error('Error fetching rooms:', error);
+      console.error('Error validating token:', error);
       throw error;
     }
   },
@@ -93,6 +98,26 @@ export const userService = {
     } catch (error) {
       console.error('Error updating user:', error);
       throw error;
+    }
+  },
+
+  /**
+   * Logout user
+   */
+  async logout(token: string): Promise<boolean> {
+    try {
+      const response = await apiService.post<{ success: boolean; message: string }>(
+        ENDPOINTS.LOGOUT,
+        {},
+        'application/json',
+        token
+      );
+
+      return response?.success || false;
+    } catch (error) {
+      console.error('Error during logout:', error);
+      // Even if the API call fails, we want to allow local logout
+      return true;
     }
   }
 };

@@ -5,6 +5,8 @@ export const en: TranslationKeys = {
   nav: {
     home: 'Home',
     settings: 'Settings',
+    user: 'User',
+    acquisitionSystems: 'Systems',
   },
 
   // Home screen
@@ -17,6 +19,25 @@ export const en: TranslationKeys = {
     loading: 'Loading...',
     error: 'An error occurred',
     retry: 'Retry',
+  },
+
+  // User screen
+  user: {
+    title: 'My Profile',
+    subtitle: 'Your personal information',
+    loading: 'Loading...',
+    error: 'Error loading profile',
+    retry: 'Retry',
+    username: 'Username',
+    email: 'Email',
+    roles: 'Roles',
+    createdAt: 'Created on',
+    editProfile: 'Edit Profile',
+    logout: 'Logout',
+    loggingOut: 'Logging out...',
+    logoutConfirm: 'Are you sure you want to logout?',
+    cancel: 'Cancel',
+    confirm: 'Confirm',
   },
 
   // Add room modal
@@ -42,6 +63,8 @@ export const en: TranslationKeys = {
     realTimeData: 'Real-time data',
     equipment: 'Equipment',
     amenities: 'Amenities',
+    acquisitionSystem: 'Acquisition System',
+    acquisitionSystemId: 'System ID',
     noData: 'No data available',
   },
 
@@ -53,6 +76,9 @@ export const en: TranslationKeys = {
     descriptionLabel: 'Description',
     descriptionPlaceholder: 'Enter a description',
     sensorTypesLabel: 'Sensor types',
+    acquisitionSystemLabel: 'Acquisition system',
+    acquisitionSystemPlaceholder: 'Select an acquisition system',
+    noAcquisitionSystem: 'No acquisition system',
     amenitiesLabel: 'Amenities',
     cancel: 'Cancel',
     save: 'Save',
@@ -75,6 +101,10 @@ export const en: TranslationKeys = {
   settings: {
     title: 'Settings',
     subtitle: 'Customize your experience',
+
+    // User Section
+    user: 'User',
+    email: 'Email',
 
     // Appearance section
     appearance: 'Appearance',
@@ -124,6 +154,100 @@ export const en: TranslationKeys = {
     minutesAgo: '{{count}} min ago',
     hoursAgo: '{{count}} h ago',
     daysAgo: '{{count}} d ago',
+  },
+
+  // Acquisition Systems
+  acquisitionSystems: {
+    title: 'Acquisition Systems',
+    subtitle: 'Manage your ESP32',
+    searchPlaceholder: 'Search for a system...',
+    noSystems: 'No systems found',
+    error: 'Error loading systems',
+    activeSensors: 'active sensors',
+    enabledTasks: 'active tasks',
+    statusActive: 'Active',
+    statusInactive: 'Inactive',
+    statusError: 'Error',
+  },
+
+  // Acquisition System Detail
+  acquisitionSystemDetail: {
+    generalInfo: 'General Information',
+    networkConfig: 'Network Configuration',
+    sensors: 'Sensors',
+    tasks: 'Tasks',
+    systemConfig: 'System Configuration',
+    deviceType: 'Device Type',
+    firmware: 'Firmware Version',
+    createdAt: 'Created At',
+    wifiSsid: 'WiFi SSID',
+    ntpServer: 'NTP Server',
+    timezone: 'Timezone',
+    gmtOffset: 'GMT Offset',
+    daylightOffset: 'Daylight Offset',
+    sensorType: 'Sensor Type',
+    enabled: 'Enabled',
+    readInterval: 'Read Interval',
+    taskName: 'Task Name',
+    interval: 'Interval',
+    priority: 'Priority',
+    taskConfig: 'Configuration',
+    debugMode: 'Debug Mode',
+    bufferSize: 'Buffer Size',
+    deepSleep: 'Deep Sleep',
+    webServer: 'Web Server',
+    webServerPort: 'Web Server Port',
+  },
+
+  // Edit Acquisition System
+  editAcquisitionSystem: {
+    title: 'Edit System',
+    cancel: 'Cancel',
+    save: 'Save',
+    saving: 'Saving...',
+    success: 'System updated successfully',
+    error: 'An error occurred while updating',
+    
+    // General Information
+    generalInfo: 'General Information',
+    name: 'Name',
+    namePlaceholder: 'System name',
+    deviceType: 'Device Type',
+    deviceTypePlaceholder: 'Device type',
+    firmwareVersion: 'Firmware Version',
+    systemStatus: 'System Status',
+    
+    // Network Configuration
+    networkConfig: 'Network Configuration',
+    wifiSsid: 'WiFi SSID',
+    ntpServer: 'NTP Server',
+    timezone: 'Timezone',
+    gmtOffset: 'GMT Offset (s)',
+    daylightOffset: 'Daylight Offset (s)',
+    
+    // System Configuration
+    systemConfig: 'System Configuration',
+    debugMode: 'Debug Mode',
+    bufferSize: 'Buffer Size',
+    deepSleep: 'Deep Sleep',
+    webServer: 'Web Server',
+    webServerPort: 'Web Server Port',
+    
+    // Sensors
+    sensors: 'Sensors',
+    sensor: 'Sensor',
+    sensorType: 'Type',
+    enabled: 'Enabled',
+    readInterval: 'Interval (ms)',
+    addSensor: 'Add Sensor',
+    
+    // Tasks
+    tasks: 'Tasks',
+    task: 'Task',
+    taskName: 'Name',
+    interval: 'Interval (ms)',
+    priority: 'Priority',
+    addTask: 'Add Task',
   },
 
   // Common

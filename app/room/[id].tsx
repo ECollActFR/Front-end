@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, useWindowDimensions } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { LoadingSpinner, Button } from '@/components/atoms';
+import { LoadingSpinner } from '@/components/atoms';
 import { ErrorMessage, AmenityChip, ConfirmDeleteModal, EquipmentItem } from '@/components/molecules';
 import { SensorCard, RoomEditModal } from '@/components/organisms';
 import { useRoomDetail } from '@/hooks/useRoomDetail';
@@ -17,11 +17,18 @@ const DESKTOP_BREAKPOINT = 768;
 
 export default function RoomDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const roomId = parseInt(id || '0');
+  const { roomDetail, isLoading, error, isAuthError, refetch } = useRoomDetail(roomId);
   const router = useRouter();
-  const { width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
-  const roomId = parseInt(id || '0', 10);
-  const { roomDetail, isLoading, error, refetch } = useRoomDetail(roomId);
+  
+  // Debug logs
+  console.log('RoomDetailScreen - roomId:', roomId);
+  console.log('RoomDetailScreen - isLoading:', isLoading);
+  console.log('RoomDetailScreen - error:', error);
+  console.log('RoomDetailScreen - roomDetail:', roomDetail);
+  console.log('RoomDetailScreen - acquisitionSystems:', roomDetail?.acquisitionSystems);
+  console.log('RoomDetailScreen - acquisitionSystems length:', roomDetail?.acquisitionSystems?.length);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -35,6 +42,7 @@ export default function RoomDetailScreen() {
   const borderColor = useThemeColor({}, 'border');
 
   const { t } = useTranslation();
+  const { width } = useWindowDimensions();
 
   const isDesktop = width >= DESKTOP_BREAKPOINT;
 
@@ -51,7 +59,11 @@ export default function RoomDetailScreen() {
   if (error) {
     return (
       <SafeAreaView style={styles.container}>
-        <ErrorMessage message={error.message || 'Une erreur est survenue'} onRetry={refetch} />
+        <ErrorMessage 
+          message={error.message || 'Une erreur est survenue'} 
+          onRetry={refetch} 
+          isAuthError={isAuthError}
+        />
       </SafeAreaView>
     );
   }
@@ -154,6 +166,23 @@ export default function RoomDetailScreen() {
               <View>
                 {roomDetail.equipment.map((equipment) => (
                   <EquipmentItem key={equipment.id} equipment={equipment} />
+                ))}
+              </View>
+            </View>
+          )}
+
+          {/* Acquisition System Section */}
+          {roomDetail.acquisitionSystems && roomDetail.acquisitionSystems.length > 0 && (
+            <View style={styles.section}>
+              <Text style={[styles.sectionTitle, { color: textSecondary }]}>{t.room.acquisitionSystem || 'Système d\'acquisition'}</Text>
+              <View>
+                {roomDetail.acquisitionSystems.map((system) => (
+                  <View key={system.id} style={[styles.detailsContainer, { backgroundColor: backgroundSecondary, marginBottom: 12 }]}>
+                    <Text style={[styles.equipmentName, { color: textColor }]}>{system.name}</Text>
+                    <Text style={[styles.equipmentCapacity, { color: textSecondary }]}>
+                      {t.room.acquisitionSystemId || 'ID'}: {system.id}
+                    </Text>
+                  </View>
                 ))}
               </View>
             </View>
@@ -279,6 +308,15 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 2,
     elevation: 1,
+  },
+  equipmentName: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  equipmentCapacity: {
+    fontSize: 14,
+    opacity: 0.7,
   },
   amenitiesContainer: {
     flexDirection: 'row',

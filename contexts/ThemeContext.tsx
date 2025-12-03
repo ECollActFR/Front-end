@@ -10,10 +10,12 @@ type ThemeContextType = {
   colorScheme: ColorSchemeName;
   // The user's preference (auto, light, or dark)
   themePreference: ThemePreference;
-  // Set the user's preference
+  // Set user's preference
   setThemePreference: (preference: ThemePreference) => void;
   // Toggle between light and dark (sets preference to that specific theme)
   toggleColorScheme: () => void;
+  // Reset theme to default
+  resetTheme: () => void;
 };
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -63,12 +65,21 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     setThemePreference(newScheme);
   };
 
+  const resetTheme = async () => {
+    try {
+      setThemePreferenceState('auto'); // Thème par défaut
+      await AsyncStorage.removeItem(THEME_STORAGE_KEY);
+    } catch (error) {
+      console.error('Error resetting theme:', error);
+    }
+  };
+
   if (isLoading) {
     return null; // Or a loading spinner
   }
 
   return (
-    <ThemeContext.Provider value={{ colorScheme, themePreference, setThemePreference, toggleColorScheme }}>
+    <ThemeContext.Provider value={{ colorScheme, themePreference, setThemePreference, toggleColorScheme, resetTheme }}>
       {children}
     </ThemeContext.Provider>
   );

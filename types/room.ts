@@ -65,6 +65,16 @@ export interface LastCaptureByType {
   capture: Capture;
 }
 
+// API Error Response
+export interface ApiErrorResponse {
+  type: string;
+  title: string;
+  status: number;
+  detail: string;
+  class?: string;
+  trace?: any[];
+}
+
 // Room Detail Response
 export interface RoomDetailResponse {
   success: number;
@@ -93,6 +103,7 @@ export interface Room {
   description?: string;
   equipment?: Equipment[];
   createdAt?: string;
+  acquisitionSystems?: ApiAcquisitionSystem[];
 }
 
 // Room Detail with sensor data
@@ -125,6 +136,7 @@ export interface RoomUpdatePayload {
   name: string;
   description: string;
   captureTypes: string[];
+  acquisitionSystem?: string; // IRI of the acquisition system or null/undefined
 }
 
 // API Room with Capture Types (for editing)

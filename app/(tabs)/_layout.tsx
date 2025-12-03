@@ -38,6 +38,13 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="person" color={color} />,
         }}
       />
+      <Tabs.Screen
+        name="acquisition-systems"
+        options={{
+          title: t.nav.acquisitionSystems || 'Systèmes',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="cpu.fill" color={color} />,
+        }}
+      />
     </Tabs>
   );
 }

@@ -31,8 +31,8 @@ const mapEquipmentToAmenities = (equipment: Equipment[]): Amenity[] => {
 
 // Default amenities based on room type (fallback if no equipment)
 const getDefaultAmenities = (name: string, description: string): Amenity[] => {
-  const lowerName = name.toLowerCase();
-  const lowerDesc = description.toLowerCase();
+  const lowerName = (name || '').toLowerCase();
+  const lowerDesc = (description || '').toLowerCase();
   const amenities: Amenity[] = [];
 
   if (
@@ -79,6 +79,8 @@ export function mapApiRoomToRoom(apiRoom: ApiRoom, index: number): Room {
     ? mapEquipmentToAmenities(equipment)
     : getDefaultAmenities(apiRoom.name, apiRoom.description);
 
+  console.log('mapApiRoomToRoom - apiRoom acquisitionSystems:', apiRoom.acquisitionSystems);
+
   return {
     id: apiRoom.id,
     name: apiRoom.name,
@@ -87,6 +89,7 @@ export function mapApiRoomToRoom(apiRoom: ApiRoom, index: number): Room {
     amenities: amenities,
     equipment: equipment,
     createdAt: apiRoom.createdAt,
+    acquisitionSystems: apiRoom.acquisitionSystems || [],
   };
 }
 

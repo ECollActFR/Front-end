@@ -5,3 +5,5 @@ export { default as DetailRow } from './DetailRow';
 export { default as AmenityChip } from './AmenityChip';
 export { default as ConfirmDeleteModal } from './ConfirmDeleteModal';
 export { default as EquipmentItem } from './EquipmentItem';
+export { default as ConfigRow } from './ConfigRow';
+export { default as ConfigSection } from './ConfigSection';

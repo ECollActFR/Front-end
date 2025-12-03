@@ -1,6 +1,6 @@
 import React from 'react';
 import { Feather } from '@expo/vector-icons';
-import { StyleProp, ViewStyle } from 'react-native';
+import { StyleProp, ViewStyle, TextStyle } from 'react-native';
 import { useThemeColor } from '@/hooks/use-theme-color';
 
 type IconName =
@@ -11,13 +11,14 @@ type IconName =
   | 'monitor'
   | 'coffee'
   | 'chevron-right'
-  | 'check';
+  | 'check'
+  | 'alert-circle';
 
 interface IconProps {
   name: IconName;
   size?: number;
   color?: string;
-  style?: StyleProp<ViewStyle>;
+  style?: StyleProp<TextStyle>;
 }
 
 export default function Icon({ name, size = 20, color, style }: IconProps) {
