@@ -12,6 +12,7 @@ import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/useTranslation';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 
+
 // Breakpoint for desktop layout
 const DESKTOP_BREAKPOINT = 768;
 
@@ -53,11 +54,6 @@ export default function HomeScreen() {
   };
 
   const handleCreateRoom = async () => {
-    if (!formData.name.trim()) {
-      Alert.alert(t.common.error, t.addRoom.nameRequired);
-      return;
-    }
-
     try {
       setIsCreating(true);
       await addRoom({
@@ -126,6 +122,7 @@ export default function HomeScreen() {
         <ErrorMessage
           message={error.message || t.home.error}
           onRetry={refetch}
+          style={styles.errorMessage}
         />
       </SafeAreaView>
     );
@@ -133,42 +130,42 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor }]}>
+
+      
       {/* Header */}
       <View style={[styles.header, { backgroundColor: cardBlue, borderBottomColor: borderColor }]}>
-        <View style={styles.headerContent}>
-          <View style={styles.headerTop}>
-            <View>
-              <Text style={[styles.title, { color: textColor }]}>{t.home.title}</Text>
-              <Text style={[styles.subtitle, { color: secondaryTextColor }]}>{t.home.subtitle}</Text>
-            </View>
-            <View style={styles.headerButtons}>
-              <TouchableOpacity
-                style={[styles.refreshButton, { backgroundColor: 'rgba(126, 159, 120, 0.15)' }]}
-                onPress={handleRefresh}
-                activeOpacity={0.7}
-                disabled={isRefreshing}
-              >
-                {isRefreshing ? (
-                  <ActivityIndicator size="small" color={tintColor} />
-                ) : (
-                  <IconSymbol name="arrow.clockwise" size={20} color={tintColor} />
-                )}
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.addButton, { backgroundColor: tintColor }]}
-                onPress={() => setIsModalVisible(true)}
-                activeOpacity={0.8}
-              >
-                <Text style={[styles.addButtonText, { color: '#FFFFFF' }]}>{t.home.addButton}</Text>
-              </TouchableOpacity>
-            </View>
+        <View style={styles.headerTop}>
+          <View>
+            <Text style={[styles.title, { color: textColor }]}>{t.home.title}</Text>
+            <Text style={[styles.subtitle, { color: secondaryTextColor }]}>{t.home.subtitle}</Text>
+          </View>
+          <View style={styles.headerButtons}>
+            <TouchableOpacity
+              style={[styles.refreshButton, { backgroundColor: 'rgba(126, 159, 120, 0.15)' }]}
+              onPress={handleRefresh}
+              activeOpacity={0.7}
+              disabled={isRefreshing}
+            >
+              {isRefreshing ? (
+                <ActivityIndicator size="small" color={tintColor} />
+              ) : (
+                <IconSymbol name="arrow.clockwise" size={20} color={tintColor} />
+              )}
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.addButton, { backgroundColor: tintColor }]}
+              onPress={() => setIsModalVisible(true)}
+              activeOpacity={0.8}
+            >
+              <Text style={[styles.addButtonText, { color: '#FFFFFF' }]}>{t.home.addButton}</Text>
+            </TouchableOpacity>
           </View>
         </View>
+      </View>
 
-        {/* Search Bar */}
-        <View style={styles.searchContainer}>
-          <SearchBar value={searchTerm} onChangeText={setSearchTerm} placeholder={t.home.searchPlaceholder} />
-        </View>
+      {/* Search Bar */}
+      <View style={styles.searchContainer}>
+        <SearchBar value={searchTerm} onChangeText={setSearchTerm} placeholder={t.home.searchPlaceholder} />
       </View>
 
       {/* Rooms List */}
@@ -185,17 +182,25 @@ export default function HomeScreen() {
         columnWrapperStyle={isDesktop ? styles.columnWrapper : undefined}
         ListEmptyComponent={renderEmptyComponent}
         showsVerticalScrollIndicator={false}
+        refreshing={isRefreshing}
+        onRefresh={handleRefresh}
       />
 
       {/* Add Room Modal */}
       <Modal
         visible={isModalVisible}
         animationType="slide"
-        transparent={true}
-        onRequestClose={() => setIsModalVisible(false)}
+        presentationStyle="pageSheet"
       >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor }]}>
+        <View style={[styles.modalContainer, { backgroundColor }]}>
+          <View style={styles.modalHeader}>
+            <Text style={[styles.modalTitle, { color: textColor }]}>{t.addRoom.title}</Text>
+            <TouchableOpacity onPress={() => setIsModalVisible(false)}>
+              <IconSymbol name="xmark" size={24} color={textColor} />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.modalContent}>
             <ScrollView showsVerticalScrollIndicator={false}>
               <Text style={[styles.modalTitle, { color: textColor }]}>{t.addRoom.title}</Text>
 
@@ -225,31 +230,31 @@ export default function HomeScreen() {
                   editable={!isCreating}
                 />
               </View>
-
-              <View style={styles.modalButtons}>
-                <TouchableOpacity
-                  style={[styles.modalButton, styles.cancelButton, { backgroundColor, borderColor: secondaryTextColor }]}
-                  onPress={() => {
-                    setIsModalVisible(false);
-                    setFormData({ name: '', description: '' });
-                  }}
-                  disabled={isCreating}
-                  activeOpacity={0.8}
-                >
-                  <Text style={[styles.cancelButtonText, { color: secondaryTextColor }]}>{t.addRoom.cancel}</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.modalButton, styles.submitButton, { backgroundColor: tintColor }, isCreating && styles.disabledButton]}
-                  onPress={handleCreateRoom}
-                  disabled={isCreating}
-                  activeOpacity={0.8}
-                >
-                  <Text style={[styles.submitButtonText, { color: backgroundColor }]}>
-                    {isCreating ? t.addRoom.creating : t.addRoom.create}
-                  </Text>
-                </TouchableOpacity>
-              </View>
             </ScrollView>
+          </View>
+
+          <View style={styles.modalButtons}>
+            <TouchableOpacity
+              style={[styles.modalButton, styles.cancelButton, { backgroundColor: borderColor }]}
+              onPress={() => {
+                setIsModalVisible(false);
+                setFormData({ name: '', description: '' });
+              }}
+              disabled={isCreating}
+              activeOpacity={0.8}
+            >
+              <Text style={[styles.cancelButtonText, { color: textColor }]}>{t.addRoom.cancel}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.modalButton, styles.submitButton, { backgroundColor: tintColor }, isCreating && styles.disabledButton]}
+              onPress={handleCreateRoom}
+              disabled={isCreating}
+              activeOpacity={0.8}
+            >
+              <Text style={[styles.submitButtonText, { color: '#FFFFFF' }]}>
+                {isCreating ? t.addRoom.creating : t.addRoom.create}
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -277,125 +282,124 @@ const styles = StyleSheet.create({
   headerTop: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    alignItems: 'center',
   },
   headerButtons: {
     flexDirection: 'row',
-    gap: 8,
     alignItems: 'center',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-  },
-  subtitle: {
-    fontSize: 14,
-    marginTop: 2,
   },
   refreshButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
+    marginRight: 12,
   },
   addButton: {
     paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
+    paddingVertical: 10,
+    borderRadius: 20,
+    minWidth: 100,
+    alignItems: 'center',
   },
   addButtonText: {
-    fontSize: 14,
+    color: '#FFFFFF',
+    fontSize: 16,
     fontWeight: '600',
   },
   searchContainer: {
     paddingHorizontal: 16,
-    paddingBottom: 16,
+    paddingVertical: 12,
   },
   listContent: {
     padding: 16,
-    paddingBottom: 20,
   },
   gridContent: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 8,
   },
   columnWrapper: {
     justifyContent: 'space-between',
-    gap: 16,
   },
   gridItem: {
-    flex: 1,
-    maxWidth: '32%',
+    width: '31%',
+    marginBottom: 12,
   },
   listItem: {
-    width: '100%',
+    marginBottom: 12,
   },
   emptyContainer: {
-    paddingVertical: 48,
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
+    paddingTop: 100,
   },
   emptyText: {
     fontSize: 16,
+    textAlign: 'center',
   },
-  modalOverlay: {
+  errorMessage: {
+    margin: 16,
+  },
+  modalContainer: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 16,
+    backgroundColor: 'rgba(0,0,0,0.5)',
   },
-  modalContent: {
-    borderRadius: 16,
-    padding: 24,
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     width: '100%',
-    maxWidth: 500,
-    maxHeight: '80%',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 5,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 16,
   },
   modalTitle: {
-    fontSize: 22,
-    fontWeight: '700',
-    marginBottom: 20,
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    borderRadius: 16,
+    width: '90%',
+    maxWidth: 400,
+    maxHeight: '80%',
   },
   formGroup: {
     marginBottom: 20,
   },
   label: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: '600',
     marginBottom: 8,
+    color: '#333',
   },
   input: {
     borderWidth: 1,
     borderRadius: 8,
-    padding: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
     fontSize: 16,
+    marginBottom: 8,
   },
   textArea: {
-    minHeight: 100,
-    paddingTop: 12,
+    height: 100,
+    textAlignVertical: 'top',
   },
   modalButtons: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: 12,
-    marginTop: 8,
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingBottom: 20,
   },
   modalButton: {
+    flex: 1,
     paddingVertical: 12,
-    paddingHorizontal: 20,
     borderRadius: 8,
-    minWidth: 100,
     alignItems: 'center',
+    marginHorizontal: 8,
   },
   cancelButton: {
     borderWidth: 1,
@@ -405,8 +409,10 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   submitButton: {
+    backgroundColor: '#007AFF',
   },
   submitButtonText: {
+    color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
   },
