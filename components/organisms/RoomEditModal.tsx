@@ -69,7 +69,7 @@ export default function RoomEditModal({ visible, roomId, onClose, onSave }: Room
       setDescription(roomData.description || '');
       // Extract numeric IDs from room capture types
       const selectedCaptureTypeIds = Array.isArray(roomData.captureTypes) 
-        ? roomData.captureTypes.map(ct => typeof ct === 'object' ? ct.id : 0)
+        ? roomData.captureTypes.map((ct: any) => typeof ct === 'object' && ct.id ? ct.id : 0)
         : [];
       
       // Debug logs to see data

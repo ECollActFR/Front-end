@@ -3,7 +3,7 @@
  */
 
 import { API_CONFIG } from '@/constants/config';
-import { tokenManager } from '@/services/tokenManager';
+import { tokenManager, TokenExpiredError, TokenStorageError } from '@/services/tokenManager';
 
 interface RequestConfig {
   url: string;
@@ -31,9 +31,20 @@ export class ApiClient {
       return config;
     }
 
-    const token = await tokenManager.getToken();
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    try {
+      const token = await tokenManager.getToken();
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    } catch (error) {
+      // Handle token errors gracefully
+      if (error instanceof TokenExpiredError) {
+        // Token expired, will be handled by the calling code
+        console.warn('Token expired during request setup');
+      } else if (error instanceof TokenStorageError) {
+        // Storage error, continue without token
+        console.warn('Token storage error:', error.message);
+      }
     }
 
     return config;
@@ -68,8 +79,13 @@ export class ApiClient {
         
         // Handle 401 errors - clear token and let calling code handle redirect
         if (response.status === 401) {
-          console.log('401 error - clearing token');
-          await tokenManager.clearToken();
+          // Clear token on 401 errors
+          try {
+            await tokenManager.clearToken();
+          } catch (clearError) {
+            // Log but don't fail the request error handling
+            console.warn('Failed to clear token after 401:', clearError);
+          }
         }
         
         throw error;

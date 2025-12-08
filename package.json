@@ -16,7 +16,10 @@
     "web": "expo start --web",
     "web:dev": "ENV=development expo start --web",
     "web:prod": "ENV=production expo start --web",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",
@@ -50,13 +53,19 @@
     "react-native-worklets": "0.5.1"
   },
   "devDependencies": {
+    "@testing-library/jest-native": "^5.4.3",
+    "@testing-library/react-native": "^13.3.3",
+    "@testing-library/user-event": "^14.6.1",
     "@types/react": "~19.1.0",
+    "@vitest/ui": "^4.0.15",
     "babel-plugin-transform-inline-environment-variables": "^0.4.4",
     "babel-preset-expo": "~54.0.0",
     "dotenv": "^17.2.3",
     "eslint": "^9.25.0",
     "eslint-config-expo": "~10.0.0",
-    "typescript": "~5.9.2"
+    "jsdom": "^27.0.1",
+    "typescript": "~5.9.2",
+    "vitest": "^3.2.4"
   },
   "private": true
 }

@@ -109,18 +109,24 @@ export default function AcquisitionSystemEditModal({ visible, systemId, onClose,
     });
   };
 
-  const updateSensor = (index: number, field: keyof ApiSensor, value: any) => {
+  const updateSensor = (index: number, field: keyof ApiSensor, value: string | number | boolean) => {
     setSensors(prev => {
       const newSensors = [...prev];
-      newSensors[index] = { ...newSensors[index], [field]: value };
+      const currentSensor = newSensors[index];
+      if (currentSensor) {
+        newSensors[index] = { ...currentSensor, [field]: value };
+      }
       return newSensors;
     });
   };
 
-  const updateTask = (index: number, field: keyof ApiTask, value: any) => {
+  const updateTask = (index: number, field: keyof ApiTask, value: string | number | boolean | Record<string, any>) => {
     setTasks(prev => {
       const newTasks = [...prev];
-      newTasks[index] = { ...newTasks[index], [field]: value };
+      const currentTask = newTasks[index];
+      if (currentTask) {
+        newTasks[index] = { ...currentTask, [field]: value };
+      }
       return newTasks;
     });
   };
@@ -128,7 +134,7 @@ export default function AcquisitionSystemEditModal({ visible, systemId, onClose,
   const addSensor = () => {
     const newSensor: ApiSensor = {
       id: Date.now(), // Temporary ID
-      captureType: '',
+      captureType: 0, // Default to 0 (should be selected from capture types)
       sensorType: '',
       enabled: true,
       readIntervalMs: 1000,

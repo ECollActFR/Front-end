@@ -5,7 +5,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { userService } from '@/services/userService';
-import { tokenManager } from '@/services/tokenManager';
+import { tokenManager, TokenExpiredError, TokenStorageError } from '@/services/tokenManager';
 import { User, LoginCredentials } from '@/types/user';
 
 /**
@@ -30,26 +30,43 @@ export const authKeys = {
  */
 async function loadAuthFromStorage(): Promise<AuthState> {
   try {
+    console.log('loadAuthFromStorage: Starting...');
     const token = await tokenManager.getToken();
+    console.log('loadAuthFromStorage: Token retrieved:', !!token);
+    
     if (token) {
       // Try to get user info with the token
       try {
+        console.log('loadAuthFromStorage: Getting user info...');
         const user = await userService.getUserInfo();
+        console.log('loadAuthFromStorage: User info retrieved:', !!user);
         return {
           token,
           user,
           isAuthenticated: true,
         };
       } catch (error) {
+        console.log('loadAuthFromStorage: Error getting user info:', error);
         // Token exists but is invalid, clear it
-        await tokenManager.clearToken();
+        try {
+          await tokenManager.clearToken();
+        } catch (clearError) {
+          console.warn('Failed to clear invalid token:', clearError);
+        }
         console.log('Token invalid, cleared from storage');
       }
     }
   } catch (error) {
-    console.error('Error loading auth from storage:', error);
+    if (error instanceof TokenExpiredError) {
+      console.log('Token expired during auth load');
+    } else if (error instanceof TokenStorageError) {
+      console.error('Token storage error during auth load:', error.message);
+    } else {
+      console.error('Error loading auth from storage:', error);
+    }
   }
 
+  console.log('loadAuthFromStorage: Returning unauthenticated state');
   return {
     token: null,
     user: null,
@@ -61,14 +78,31 @@ async function loadAuthFromStorage(): Promise<AuthState> {
  * Save auth state to storage
  */
 async function saveAuthToStorage(token: string, user: User): Promise<void> {
-  await tokenManager.setToken(token);
+  try {
+    await tokenManager.setToken(token);
+  } catch (error) {
+    if (error instanceof TokenExpiredError) {
+      throw new Error('Cannot save expired token');
+    } else if (error instanceof TokenStorageError) {
+      throw new Error(`Failed to save token securely: ${error.message}`);
+    }
+    throw error;
+  }
 }
 
 /**
  * Clear auth from storage
  */
 async function clearAuthFromStorage(): Promise<void> {
-  await tokenManager.clearToken();
+  try {
+    await tokenManager.clearToken();
+  } catch (error) {
+    if (error instanceof TokenStorageError) {
+      console.warn('Failed to clear token from secure storage:', error.message);
+    } else {
+      throw error;
+    }
+  }
 }
 
 /**

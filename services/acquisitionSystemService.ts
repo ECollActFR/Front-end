@@ -19,9 +19,9 @@ import {
  * @param roomIri - Room IRI like "/rooms/20"
  * @returns Room ID or null if invalid
  */
-function extractRoomId(roomIri: string): number | null {
+function extractRoomId(roomIri: string | undefined): number | null {
   if (!roomIri) return null;
-  const match = roomIri.match(/\/rooms\/(\d+)/);
+  const match = roomIri?.match(/\/rooms\/(\d+)/);
   return match ? parseInt(match[1], 10) : null;
 }
 
@@ -108,7 +108,7 @@ export const acquisitionSystemService = {
       }
 
       // Transform API systems to UI systems
-      const systems = response.member.map(apiSystem =>
+      const systems = response.member.map((apiSystem) =>
         transformApiSystem(apiSystem, apiSystem)
       );
 

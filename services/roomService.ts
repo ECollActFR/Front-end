@@ -18,8 +18,8 @@ export const roomService = {
 
       // Validate response format
       if (!response || !response.member || !Array.isArray(response.member)) {
+        console.log('Invalid response format:', response);
         throw new Error('Invalid API response format');
-        console.log(response);
       }
 
       // Transform API rooms to UI rooms
@@ -52,7 +52,7 @@ export const roomService = {
       }
 
       // Validate response format - handle both direct data and wrapped data
-      let responseData;
+      let responseData: any;
       if (response && response.data) {
         responseData = response.data;
       } else if (response) {
@@ -66,7 +66,7 @@ export const roomService = {
 
       // Try to fetch the full room data to get equipment and other details
       // Only if the main response doesn't already contain acquisition systems
-      let roomData;
+      let roomData: any;
       if (!responseData.acquisitionSystems || responseData.acquisitionSystems.length === 0) {
         try {
           console.log('Fetching full room data from:', ENDPOINTS.ROOM(roomId));
@@ -205,7 +205,7 @@ export const roomService = {
       }
 
       // Handle both direct room objects and collections
-      let roomData;
+      let roomData: any;
       if (response.member && Array.isArray(response.member) && response.member.length > 0) {
         // It's a collection, get the first room
         roomData = response.member[0];
@@ -217,7 +217,7 @@ export const roomService = {
       }
 
       // Transform captureTypes from full objects to just IDs for editing
-      const captureTypeIds = roomData.captureTypes?.map((ct: any) => ct['@id']) || [];
+      const captureTypeIds = roomData.captureTypes?.map((ct: { '@id': string }) => ct['@id']) || [];
 
       return {
         ...roomData,

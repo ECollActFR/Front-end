@@ -6,7 +6,13 @@
     "esModuleInterop": true,
     "moduleResolution": "bundler",
     "isolatedModules": true,
-    "strict": false,
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
     "paths": {
       "@/*": [
         "./*"

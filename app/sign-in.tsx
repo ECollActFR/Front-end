@@ -32,14 +32,18 @@ export default function SignInScreen() {
     }
 
     try {
+      console.log('SignIn: Starting login process');
       // Call login with TanStack Query
       await login({
         username: username.trim(),
         password: password.trim(),
       });
 
-      // Navigate to home
-      router.replace('/(tabs)');
+      console.log('SignIn: Login successful, navigating to tabs');
+      // Navigate to home with delay to ensure state is updated
+      setTimeout(() => {
+        router.replace('/(tabs)');
+      }, 200);
     } catch (error: any) {
       console.error('Login error:', error);
 

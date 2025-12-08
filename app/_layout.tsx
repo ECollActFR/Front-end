@@ -12,9 +12,12 @@ import { useAuth, AuthProvider } from '@/contexts/AuthContext';
 import { SettingsProvider } from '@/contexts/SettingsContext';
 import { queryClient } from '@/config/queryClient';
 import { tokenManager } from '@/services/tokenManager';
+import { ErrorBoundary, AuthErrorBoundary } from '@/components/ErrorBoundary';
 
-// Initialize token manager
-tokenManager.initialize();
+// Initialize secure token manager
+tokenManager.initialize().catch((error) => {
+  console.warn('Failed to initialize secure token manager:', error);
+});
 
 // Only import react-native-reanimated on native platforms
 if (Platform.OS !== 'web') {
@@ -70,8 +73,10 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
 
     console.log('AuthGuard: isProtected:', isProtected, 'currentRoute:', currentRoute);
 
-    if (isProtected && !token) {
-      console.log('AuthGuard: redirecting to sign-in');
+    // Use isAuthenticated instead of just token for better security
+    // Also don't redirect if we're already on sign-in page
+    if (isProtected && !isAuthenticated && currentRoute !== 'sign-in') {
+      console.log('AuthGuard: redirecting to sign-in (not authenticated)');
       router.replace('/sign-in');
     }
   }, [segments, token, isLoading, isAuthenticated]);
@@ -109,14 +114,14 @@ function RootLayoutContent() {
 // ---- Composition globale ----
 export default function RootLayout() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <SettingsProvider>
-        <AuthProvider>
-          <AuthGuard>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <SettingsProvider>
+          <AuthProvider>
             <RootLayoutContent />
-          </AuthGuard>
-        </AuthProvider>
-      </SettingsProvider>
-    </QueryClientProvider>
+          </AuthProvider>
+        </SettingsProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
