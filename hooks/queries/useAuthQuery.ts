@@ -4,12 +4,9 @@
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { userService } from '@/services/userService';
 import { tokenManager } from '@/services/tokenManager';
 import { User, LoginCredentials } from '@/types/user';
-
-const AUTH_STORAGE_KEY = 'auth-storage';
 
 /**
  * Auth state interface
@@ -29,20 +26,24 @@ export const authKeys = {
 };
 
 /**
- * Load auth state from AsyncStorage
+ * Load auth state from storage
  */
 async function loadAuthFromStorage(): Promise<AuthState> {
   try {
-    const stored = await AsyncStorage.getItem(AUTH_STORAGE_KEY);
-    if (stored) {
-      const { token, user } = JSON.parse(stored);
-      if (token) {
-        tokenManager.setToken(token);
+    const token = await tokenManager.getToken();
+    if (token) {
+      // Try to get user info with the token
+      try {
+        const user = await userService.getUserInfo();
         return {
           token,
           user,
           isAuthenticated: true,
         };
+      } catch (error) {
+        // Token exists but is invalid, clear it
+        await tokenManager.clearToken();
+        console.log('Token invalid, cleared from storage');
       }
     }
   } catch (error) {
@@ -57,27 +58,17 @@ async function loadAuthFromStorage(): Promise<AuthState> {
 }
 
 /**
- * Save auth state to AsyncStorage
+ * Save auth state to storage
  */
 async function saveAuthToStorage(token: string, user: User): Promise<void> {
-  try {
-    await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({ token, user }));
-    tokenManager.setToken(token);
-  } catch (error) {
-    console.error('Error saving auth to storage:', error);
-  }
+  await tokenManager.setToken(token);
 }
 
 /**
- * Clear auth from AsyncStorage
+ * Clear auth from storage
  */
 async function clearAuthFromStorage(): Promise<void> {
-  try {
-    await AsyncStorage.removeItem(AUTH_STORAGE_KEY);
-    tokenManager.clearToken();
-  } catch (error) {
-    console.error('Error clearing auth from storage:', error);
-  }
+  await tokenManager.clearToken();
 }
 
 /**
@@ -148,9 +139,10 @@ export function useLoginMutation() {
 
       // Extract token from response.data.token
       const token = response.data.token;
-
+      // Set token in tokenManager for getUserInfo to use
+      await tokenManager.setToken(token);
       // Get user info with the token
-      const user = await userService.getUserInfo(token);
+      const user = await userService.getUserInfo();
 
       return { token, user };
     },
@@ -179,18 +171,26 @@ export function useLogoutMutation() {
 
   return useMutation({
     mutationFn: async () => {
+      console.log('Logout mutation: clearing auth from storage');
       await clearAuthFromStorage();
+      console.log('Logout mutation: storage cleared');
     },
     onSuccess: () => {
+      console.log('Logout mutation: onSuccess called');
       // Clear auth state
       queryClient.setQueryData<AuthState>(authKeys.state, {
         token: null,
         user: null,
         isAuthenticated: false,
       });
+      console.log('Logout mutation: auth state cleared');
 
       // Clear all queries (fresh start)
       queryClient.clear();
+      console.log('Logout mutation: all queries cleared');
+    },
+    onError: (error) => {
+      console.error('Logout mutation: error occurred', error);
     },
   });
 }
@@ -202,11 +202,10 @@ export function useLoadUserInfoMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (token: string) => {
-      if (!token) throw new Error('No token provided');
-      return userService.getUserInfo(token);
+    mutationFn: async () => {
+      return userService.getUserInfo();
     },
-    onSuccess: async (user, token) => {
+    onSuccess: async (user) => {
       // Get current auth state
       const currentAuth = queryClient.getQueryData<AuthState>(authKeys.state);
 
@@ -223,7 +222,7 @@ export function useLoadUserInfoMutation() {
         await saveAuthToStorage(currentAuth.token, user);
 
         // Update user cache
-        queryClient.setQueryData(['auth', 'user', token], user);
+        queryClient.setQueryData(['auth', 'user', currentAuth.token], user);
       }
     },
   });
@@ -236,10 +235,10 @@ export function useUpdateUserMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ token, payload }: { token: string; payload: any }) => {
-      return userService.updateUser(token, payload);
+    mutationFn: async (payload: any) => {
+      return userService.updateUser(payload);
     },
-    onSuccess: async (updatedUser, { token }) => {
+    onSuccess: async (updatedUser) => {
       // Get current auth state
       const currentAuth = queryClient.getQueryData<AuthState>(authKeys.state);
 
@@ -256,7 +255,7 @@ export function useUpdateUserMutation() {
         await saveAuthToStorage(currentAuth.token, updatedUser);
 
         // Update user cache
-        queryClient.setQueryData(['auth', 'user', token], updatedUser);
+        queryClient.setQueryData(['auth', 'user', currentAuth.token], updatedUser);
       }
     },
   });

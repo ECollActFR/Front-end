@@ -11,6 +11,10 @@ import { Colors } from '@/constants/theme';
 import { useAuth, AuthProvider } from '@/contexts/AuthContext';
 import { SettingsProvider } from '@/contexts/SettingsContext';
 import { queryClient } from '@/config/queryClient';
+import { tokenManager } from '@/services/tokenManager';
+
+// Initialize token manager
+tokenManager.initialize();
 
 // Only import react-native-reanimated on native platforms
 if (Platform.OS !== 'web') {
@@ -50,11 +54,12 @@ const DarkNavigationTheme = {
 
 // ---- AuthGuard ----
 function AuthGuard({ children }: { children: React.ReactNode }) {
-  const { token, isLoading } = useAuth();
+  const { token, isLoading, isAuthenticated } = useAuth();
   const router = useRouter();
   const segments = useSegments();
 
   useEffect(() => {
+    console.log('AuthGuard: token:', token, 'isAuthenticated:', isAuthenticated, 'isLoading:', isLoading);
     if (isLoading) return;
 
     // Routes protégées
@@ -63,10 +68,13 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
 
     const isProtected = protectedRoutes.some((r) => currentRoute.startsWith(r));
 
+    console.log('AuthGuard: isProtected:', isProtected, 'currentRoute:', currentRoute);
+
     if (isProtected && !token) {
+      console.log('AuthGuard: redirecting to sign-in');
       router.replace('/sign-in');
     }
-  }, [segments, token, isLoading]);
+  }, [segments, token, isLoading, isAuthenticated]);
 
   if (isLoading) {
     return (

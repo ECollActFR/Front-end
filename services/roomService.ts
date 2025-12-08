@@ -2,9 +2,9 @@
  * Room service for API operations
  */
 
-import { apiService } from './api';
+import { apiClient } from './middleware';
 import { ENDPOINTS } from '@/constants/config';
-import { Room, HydraCollection, ApiRoom, RoomDetailResponse, RoomDetail, RoomUpdatePayload, ApiCaptureType, ApiRoomWithCaptureTypes, ApiErrorResponse } from '@/types/room';
+import { Room, HydraCollection, ApiRoom, RoomDetail, RoomUpdatePayload, ApiCaptureType, ApiRoomWithCaptureTypes, ApiErrorResponse } from '@/types/room';
 import { mapApiRoomsToRooms, mapApiRoomToRoom } from '@/utils/roomMapper';
 
 export const roomService = {
@@ -14,7 +14,7 @@ export const roomService = {
   async getRooms(): Promise<Room[]> {
     try {
       // Fetch the Hydra collection response
-      const response = await apiService.get<HydraCollection<ApiRoom>>(ENDPOINTS.ROOMS, undefined, 'application/ld+json');
+      const response = await apiClient.get<HydraCollection<ApiRoom>>(ENDPOINTS.ROOMS);
 
       // Validate response format
       if (!response || !response.member || !Array.isArray(response.member)) {
@@ -41,7 +41,7 @@ export const roomService = {
       console.log('ENDPOINTS.ROOM_DETAIL(roomId):', ENDPOINTS.ROOM_DETAIL(roomId));
       
       // Fetch room detail with last capture
-      const response = await apiService.get<any>(ENDPOINTS.ROOM_DETAIL(roomId), undefined, 'application/ld+json');
+      const response = await apiClient.get<any>(ENDPOINTS.ROOM_DETAIL(roomId));
       console.log('API response received:', response);
 
       // Check if response is an error object
@@ -70,7 +70,7 @@ export const roomService = {
       if (!responseData.acquisitionSystems || responseData.acquisitionSystems.length === 0) {
         try {
           console.log('Fetching full room data from:', ENDPOINTS.ROOM(roomId));
-          roomData = await apiService.get<any>(ENDPOINTS.ROOM(roomId), undefined, 'application/ld+json');
+          roomData = await apiClient.get<any>(ENDPOINTS.ROOM(roomId));
           console.log('Full room data received:', roomData);
           console.log('Full room data acquisition systems:', roomData?.acquisitionSystems);
           
@@ -198,7 +198,7 @@ export const roomService = {
    */
   async getRoom(roomId: number): Promise<ApiRoomWithCaptureTypes> {
     try {
-      const response = await apiService.get<any>(ENDPOINTS.ROOM(roomId), undefined, 'application/ld+json');
+      const response = await apiClient.get<any>(ENDPOINTS.ROOM(roomId));
 
       if (!response) {
         throw new Error('Invalid API response format');
@@ -234,7 +234,7 @@ export const roomService = {
    */
   async getCaptureTypes(): Promise<ApiCaptureType[]> {
     try {
-      const response = await apiService.get<HydraCollection<ApiCaptureType>>(ENDPOINTS.CAPTURE_TYPES, undefined, 'application/ld+json');
+      const response = await apiClient.get<HydraCollection<ApiCaptureType>>(ENDPOINTS.CAPTURE_TYPES);
 
       if (!response || !response.member || !Array.isArray(response.member)) {
         throw new Error('Invalid API response format');
@@ -252,7 +252,7 @@ export const roomService = {
    */
   async updateRoom(roomId: number, payload: RoomUpdatePayload): Promise<ApiRoom> {
     try {
-      const response = await apiService.put<ApiRoom>(ENDPOINTS.ROOM_UPDATE(roomId), payload, 'application/ld+json', 'application/ld+json');
+      const response = await apiClient.put<ApiRoom>(ENDPOINTS.ROOM_UPDATE(roomId), payload);
 
       if (!response) {
         throw new Error('Invalid API response format');
@@ -270,7 +270,7 @@ export const roomService = {
    */
   async deleteRoom(roomId: number): Promise<void> {
     try {
-      await apiService.delete(ENDPOINTS.ROOM_DELETE(roomId), 'application/ld+json');
+      await apiClient.delete(ENDPOINTS.ROOM_DELETE(roomId));
     } catch (error) {
       console.error('Error deleting room:', error);
       throw error;
@@ -282,7 +282,7 @@ export const roomService = {
    */
   async createRoom(payload: RoomUpdatePayload): Promise<ApiRoom> {
     try {
-      const response = await apiService.post<ApiRoom>(ENDPOINTS.ROOM_CREATE, payload, 'application/ld+json', 'application/ld+json');
+      const response = await apiClient.post<ApiRoom>(ENDPOINTS.ROOM_CREATE, payload);
 
       if (!response) {
         throw new Error('Invalid API response format');

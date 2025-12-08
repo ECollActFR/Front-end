@@ -2,11 +2,9 @@
  * User service for API operations
  */
 
-import { apiService } from './api';
+import { apiClient } from './middleware';
 import { ENDPOINTS } from '@/constants/config';
-import { Room, HydraCollection, ApiRoom, RoomDetailResponse, RoomDetail, RoomUpdatePayload, ApiCaptureType, ApiRoomWithCaptureTypes } from '@/types/room';
 import { ApiValidateToken, ValidateToken, LoginCredentials, LoginResponse, UserInfoResponse, User, UpdateUserPayload, AuthError } from '@/types/user';
-import { mapApiRoomsToRooms, mapApiRoomToRoom } from '@/utils/roomMapper';
 
 export const userService = {
   /**
@@ -14,10 +12,10 @@ export const userService = {
    */
   async login(credentials: LoginCredentials): Promise<LoginResponse> {
     try {
-      const response = await apiService.post<LoginResponse>(
+      const response = await apiClient.post<LoginResponse>(
         ENDPOINTS.LOGIN,
         credentials,
-        'application/json'
+        { 'Content-Type': 'application/json', 'Accept': 'application/json' }
       );
 
       if (!response?.data?.token) {
@@ -37,7 +35,7 @@ export const userService = {
   async validateToken(payload: ValidateToken): Promise<boolean> {
     try {
       // Fetch the Hydra collection response
-      const response = await apiService.post<ApiValidateToken>(ENDPOINTS.USER_VALIDATE, payload);
+      const response = await apiClient.post<ApiValidateToken>(ENDPOINTS.USER_VALIDATE, payload);
 
       // Validate response format
       if (!response || !response.success) {
@@ -59,12 +57,11 @@ export const userService = {
   /**
    * Get current user info
    */
-  async getUserInfo(token: string): Promise<User> {
+  async getUserInfo(): Promise<User> {
     try {
-      const response = await apiService.get<UserInfoResponse>(
+      const response = await apiClient.get<UserInfoResponse>(
         ENDPOINTS.USER_INFO,
-        'application/json',
-        token
+        { 'Accept': 'application/json' }
       );
 
       if (!response || !response.success || !response.user) {
@@ -81,13 +78,12 @@ export const userService = {
   /**
    * Update current user info
    */
-  async updateUser(token: string, payload: UpdateUserPayload): Promise<User> {
+  async updateUser(payload: UpdateUserPayload): Promise<User> {
     try {
-      const response = await apiService.put<UserInfoResponse>(
+      const response = await apiClient.put<UserInfoResponse>(
         ENDPOINTS.USER_UPDATE,
         payload,
-        'application/json',
-        token
+        { 'Content-Type': 'application/json', 'Accept': 'application/json' }
       );
 
       if (!response || !response.success || !response.user) {
@@ -104,13 +100,12 @@ export const userService = {
   /**
    * Logout user
    */
-  async logout(token: string): Promise<boolean> {
+  async logout(): Promise<boolean> {
     try {
-      const response = await apiService.post<{ success: boolean; message: string }>(
+      const response = await apiClient.post<{ success: boolean; message: string }>(
         ENDPOINTS.LOGOUT,
         {},
-        'application/json',
-        token
+        { 'Content-Type': 'application/json', 'Accept': 'application/json' }
       );
 
       return response?.success || false;

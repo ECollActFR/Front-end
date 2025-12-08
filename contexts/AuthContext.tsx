@@ -58,18 +58,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = async () => {
+    console.log('AuthContext: logout function called');
     await logoutMutation.mutateAsync();
+    console.log('AuthContext: logout mutation completed');
   };
 
   const loadUserInfo = async () => {
     if (authState?.token) {
-      await loadUserInfoMutation.mutateAsync(authState.token);
+      await loadUserInfoMutation.mutateAsync();
     }
   };
 
   const updateUser = async (payload: any) => {
     if (authState?.token) {
-      await updateUserMutation.mutateAsync({ token: authState.token, payload });
+      await updateUserMutation.mutateAsync(payload);
     }
   };
 

@@ -2,7 +2,7 @@
  * Acquisition System service for API operations
  */
 
-import { apiService } from './api';
+import { apiClient } from './middleware';
 import { ENDPOINTS } from '@/constants/config';
 import {
   ApiAcquisitionSystem,
@@ -98,10 +98,8 @@ export const acquisitionSystemService = {
   async getAcquisitionSystems(): Promise<AcquisitionSystem[]> {
     try {
       // Fetch the Hydra collection response
-      const response = await apiService.get<HydraCollection<ApiAcquisitionSystemConfig>>(
-        ENDPOINTS.ACQUISITION_SYSTEMS,
-        undefined,
-        'application/ld+json'
+      const response = await apiClient.get<HydraCollection<ApiAcquisitionSystemConfig>>(
+        ENDPOINTS.ACQUISITION_SYSTEMS
       );
 
       // Validate response format
@@ -127,10 +125,8 @@ export const acquisitionSystemService = {
   async getAvailableAcquisitionSystems(excludeRoomId?: number): Promise<AcquisitionSystem[]> {
     try {
       // Fetch Hydra collection response
-      const response = await apiService.get<HydraCollection<ApiAcquisitionSystemConfig>>(
-        ENDPOINTS.ACQUISITION_SYSTEMS,
-        undefined,
-        'application/ld+json'
+      const response = await apiClient.get<HydraCollection<ApiAcquisitionSystemConfig>>(
+        ENDPOINTS.ACQUISITION_SYSTEMS
       );
 
       // Validate response format
@@ -163,10 +159,8 @@ export const acquisitionSystemService = {
   async getAcquisitionSystemConfig(id: number): Promise<AcquisitionSystemConfig> {
     try {
       // Fetch configuration endpoint
-      const response = await apiService.get<ApiAcquisitionSystemConfig>(
-        ENDPOINTS.ACQUISITION_SYSTEM_CONFIG(id),
-        undefined,
-        'application/ld+json'
+      const response = await apiClient.get<ApiAcquisitionSystemConfig>(
+        ENDPOINTS.ACQUISITION_SYSTEM_CONFIG(id)
       );
 
       // Validate response format
@@ -198,11 +192,9 @@ export const acquisitionSystemService = {
   async updateAcquisitionSystem(id: number, data: Partial<AcquisitionSystemConfig>): Promise<AcquisitionSystemConfig> {
     try {
       // Send update request to API
-      const response = await apiService.put<ApiAcquisitionSystemConfig>(
+      const response = await apiClient.put<ApiAcquisitionSystemConfig>(
         ENDPOINTS.ACQUISITION_SYSTEM_UPDATE(id),
-        data,
-        'application/ld+json',
-        'application/ld+json'
+        data
       );
 
       // Validate response format
@@ -233,10 +225,8 @@ export const acquisitionSystemService = {
    */
   async getCaptureTypes(): Promise<CaptureType[]> {
     try {
-      const response = await apiService.get<CaptureTypeCollection>(
-        ENDPOINTS.CAPTURE_TYPES,
-        undefined,
-        'application/ld+json'
+      const response = await apiClient.get<CaptureTypeCollection>(
+        ENDPOINTS.CAPTURE_TYPES
       );
 
       if (!response || !response.member || !Array.isArray(response.member)) {
