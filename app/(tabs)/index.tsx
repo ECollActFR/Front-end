@@ -1,8 +1,6 @@
-import { LoadingSpinner } from '@/components/atoms';
-import Button from '@/components/atoms/Button';
-import { ErrorMessage, SearchBar } from '@/components/molecules';
+import { SearchBar } from '@/components/molecules';
 import { RoomCard } from '@/components/organisms';
-import { useRooms } from '@/hooks/useRooms';
+import { useRoomsInfiniteQuery, useCreateRoomMutation } from '@/hooks/queries/useRoomsInfiniteQuery';
 import { Room } from '@/types/room';
 import { useRouter } from 'expo-router';
 import React, { useMemo, useState } from 'react';
@@ -18,7 +16,17 @@ const DESKTOP_BREAKPOINT = 768;
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { rooms, isLoading, error, refetch, addRoom } = useRooms();
+  const { 
+    data: rooms, 
+    isLoading, 
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+    refetch,
+    error 
+  } = useRoomsInfiniteQuery();
+  const createMutation = useCreateRoomMutation();
+  
   const [searchTerm, setSearchTerm] = useState('');
   const { width } = useWindowDimensions();
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -56,7 +64,7 @@ export default function HomeScreen() {
   const handleCreateRoom = async () => {
     try {
       setIsCreating(true);
-      await addRoom({
+      await createMutation.mutateAsync({
         name: formData.name,
         description: formData.description,
         captureTypes: [], // Empty array for now
@@ -72,14 +80,7 @@ export default function HomeScreen() {
   };
 
   const handleRefresh = async () => {
-    try {
-      setIsRefreshing(true);
-      await refetch();
-    } catch (error: any) {
-      Alert.alert(t.common.error, error.message || 'Failed to refresh data');
-    } finally {
-      setIsRefreshing(false);
-    }
+    refetch();
   };
 
   const renderRoom = ({ item, index }: { item: Room; index: number }) => (
@@ -169,21 +170,29 @@ export default function HomeScreen() {
       </View>
 
       {/* Rooms List */}
-      <FlatList
-        key={numColumns} // Force re-render when columns change
+      <InfiniteList
         data={filteredRooms}
-        renderItem={renderRoom}
+        isLoading={isLoading}
+        isFetchingNextPage={isFetchingNextPage}
+        hasNextPage={hasNextPage}
+        fetchNextPage={fetchNextPage}
+        error={error}
+        onRefresh={handleRefresh}
+        isRefreshing={isRefreshing}
+        emptyMessage={t.home.noRooms}
+        loadingMoreText={t.admin.loadingMore}
+        renderItem={({ item, index }) => (
+          <View style={isDesktop ? styles.gridItem : styles.listItem}>
+            <RoomCard room={item} onPress={() => handleRoomPress(item.id)} index={index} />
+          </View>
+        )}
         keyExtractor={(item) => item.id.toString()}
-        numColumns={numColumns}
         contentContainerStyle={[
           styles.listContent,
           isDesktop && styles.gridContent,
         ]}
+        numColumns={numColumns}
         columnWrapperStyle={isDesktop ? styles.columnWrapper : undefined}
-        ListEmptyComponent={renderEmptyComponent}
-        showsVerticalScrollIndicator={false}
-        refreshing={isRefreshing}
-        onRefresh={handleRefresh}
       />
 
       {/* Add Room Modal */}

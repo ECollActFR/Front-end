@@ -1,12 +1,11 @@
-import { LoadingSpinner } from '@/components/atoms';
-import { ErrorMessage, SearchBar } from '@/components/molecules';
+import { SearchBar } from '@/components/molecules';
+import InfiniteList from '@/components/InfiniteList';
 import AcquisitionSystemCard from '@/components/organisms/AcquisitionSystemCard';
-import { useAcquisitionSystems } from '@/hooks/useAcquisitionSystems';
+import { useAcquisitionSystemsInfiniteQuery } from '@/hooks/queries/useAcquisitionSystemsInfiniteQuery';
 import { AcquisitionSystem } from '@/types/acquisitionSystem';
 import { useRouter } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import {
-  FlatList,
   StyleSheet,
   Text,
   useWindowDimensions,
@@ -25,10 +24,19 @@ const DESKTOP_BREAKPOINT = 768;
 
 export default function AcquisitionSystemsScreen() {
   const router = useRouter();
-  const { systems, isLoading, error, refetch } = useAcquisitionSystems();
+  const { 
+    data: systems, 
+    isLoading, 
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+    refetch,
+    error 
+  } = useAcquisitionSystemsInfiniteQuery();
+  
   const [searchTerm, setSearchTerm] = useState('');
   const { width } = useWindowDimensions();
-  const [isRefreshing, setIsRefreshing] = useState(false);
+
 
   const backgroundColor = useThemeColor({}, 'background');
   const textColor = useThemeColor({}, 'text');
@@ -55,18 +63,8 @@ export default function AcquisitionSystemsScreen() {
     router.push(`/acquisition-system/${systemId}`);
   };
 
-  const handleRefresh = async () => {
-    try {
-      setIsRefreshing(true);
-      await refetch();
-    } catch (error: any) {
-      Alert.alert(
-        t.common?.error || 'Erreur',
-        error.message || 'Échec de la mise à jour des données'
-      );
-    } finally {
-      setIsRefreshing(false);
-    }
+  const handleRefresh = () => {
+    refetch();
   };
 
   const renderSystem = ({ item, index }: { item: AcquisitionSystem; index: number }) => (
@@ -170,16 +168,30 @@ export default function AcquisitionSystemsScreen() {
       </View>
 
       {/* Systems List */}
-      <FlatList
-        key={numColumns} // Force re-render when columns change
+      <InfiniteList
         data={filteredSystems}
-        renderItem={renderSystem}
+        isLoading={isLoading}
+        isFetchingNextPage={isFetchingNextPage}
+        hasNextPage={hasNextPage}
+        fetchNextPage={fetchNextPage}
+        error={error}
+        onRefresh={handleRefresh}
+        isRefreshing={isRefreshing}
+        emptyMessage={t.acquisitionSystems?.noSystems || 'Aucun système trouvé'}
+        loadingMoreText={t.admin.loadingMore}
+        renderItem={({ item, index }) => (
+          <View style={isDesktop ? styles.gridItem : styles.listItem}>
+            <AcquisitionSystemCard
+              system={item}
+              onPress={() => handleSystemPress(item.id)}
+              index={index}
+            />
+          </View>
+        )}
         keyExtractor={(item) => item.id.toString()}
-        numColumns={numColumns}
         contentContainerStyle={[styles.listContent, isDesktop && styles.gridContent]}
+        numColumns={numColumns}
         columnWrapperStyle={isDesktop ? styles.columnWrapper : undefined}
-        ListEmptyComponent={renderEmptyComponent}
-        showsVerticalScrollIndicator={false}
       />
     </SafeAreaView>
   );

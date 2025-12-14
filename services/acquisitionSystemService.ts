@@ -108,11 +108,31 @@ export const acquisitionSystemService = {
       }
 
       // Transform API systems to UI systems
-      const systems = response.member.map((apiSystem) =>
-        transformApiSystem(apiSystem, apiSystem)
-      );
+      const systems = response.member.map(transformApiSystem);
 
       return systems;
+    } catch (error) {
+      console.error('Error fetching acquisition systems:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Fetch acquisition systems with pagination support
+   */
+  async getAcquisitionSystemsPaginated(page: number = 1, limit: number = 20): Promise<HydraCollection<ApiAcquisitionSystemConfig>> {
+    try {
+      // Fetch the Hydra collection response with pagination
+      const response = await apiClient.get<HydraCollection<ApiAcquisitionSystemConfig>>(
+        `${ENDPOINTS.ACQUISITION_SYSTEMS}?page=${page}&limit=${limit}`
+      );
+
+      // Validate response format
+      if (!response || !response.member || !Array.isArray(response.member)) {
+        throw new Error('Invalid API response format');
+      }
+
+      return response;
     } catch (error) {
       console.error('Error fetching acquisition systems:', error);
       throw error;

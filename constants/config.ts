@@ -56,4 +56,8 @@ export const ENDPOINTS = {
   ACQUISITION_SYSTEM: (id: number) => `/acquisition_systems/${id}`,
   ACQUISITION_SYSTEM_CONFIG: (id: number) => `/acquisition_systems/${id}/configuration`,
   ACQUISITION_SYSTEM_UPDATE: (id: number) => `/acquisition_systems/${id}`,
+  CLIENT_ACCOUNTS: '/client_accounts',
+  CLIENT_ACCOUNT: (id: number) => `/client_accounts/${id}`,
+  USERS: '/users',
+  USER: (id: number) => `/users/${id}`,
 } as const;

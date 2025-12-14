@@ -33,6 +33,27 @@ export const roomService = {
   },
 
   /**
+   * Fetch rooms with pagination support
+   */
+  async getRoomsPaginated(page: number = 1, limit: number = 20): Promise<HydraCollection<ApiRoom>> {
+    try {
+      // Fetch the Hydra collection response with pagination
+      const response = await apiClient.get<HydraCollection<ApiRoom>>(`${ENDPOINTS.ROOMS}?page=${page}&limit=${limit}`);
+
+      // Validate response format
+      if (!response || !response.member || !Array.isArray(response.member)) {
+        console.log('Invalid response format:', response);
+        throw new Error('Invalid API response format');
+      }
+
+      return response;
+    } catch (error) {
+      console.error('Error fetching rooms:', error);
+      throw error;
+    }
+  },
+
+  /**
    * Fetch room detail with last capture data
    */
   async getRoomDetail(roomId: number): Promise<RoomDetail> {
