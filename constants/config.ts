@@ -43,6 +43,7 @@ export const ENDPOINTS = {
   ROOMS: '/rooms',
   ROOM_CREATE: '/rooms',
   ROOM_DETAIL: (roomId: number) => `/rooms/${roomId}/lastCaptures`,
+  ROOM_LAST_7_DAYS: (roomId: number) => `/rooms/${roomId}/captures/last7days`,
   ROOM: (roomId: number) => `/rooms/${roomId}`,
   ROOM_UPDATE: (roomId: number) => `/rooms/${roomId}`,
   ROOM_DELETE: (roomId: number) => `/rooms/${roomId}`,

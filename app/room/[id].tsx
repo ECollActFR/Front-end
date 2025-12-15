@@ -11,6 +11,8 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { roomService } from '@/services/roomService';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/useTranslation';
+import { RoomAnalytics } from '@/components/organisms/RoomAnalytics';
+import { chartService } from '@/services/chartService';
 
 // Breakpoint for desktop layout
 const DESKTOP_BREAKPOINT = 768;
@@ -185,6 +187,17 @@ export default function RoomDetailScreen() {
                   </View>
                 ))}
               </View>
+            </View>
+          )}
+
+          {/* Analytics Section (7 derniers jours) */}
+          {roomDetail.lastCapturesByType && roomDetail.lastCapturesByType.length > 0 && (
+            <View style={styles.section}>
+              <RoomAnalytics
+                roomId={roomId}
+                sensorTypes={chartService.extractSensorTypes(roomDetail)}
+                isDesktop={isDesktop}
+              />
             </View>
           )}
 
