@@ -30,6 +30,10 @@ export default function AdminScreen() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isRefreshing] = useState(false);
   const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
+  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [editingClientAccount, setEditingClientAccount] = useState<ClientAccount | null>(null);
+  const [isAddUserModalVisible, setIsAddUserModalVisible] = useState(false);
+  const [targetClientAccount, setTargetClientAccount] = useState<ClientAccount | null>(null);
   const [deleteModal, setDeleteModal] = useState<{
     visible: boolean;
     clientAccount: ClientAccount | null;
@@ -44,6 +48,13 @@ export default function AdminScreen() {
     country: '',
     phone: '',
     contactEmail: '',
+  });
+
+  const [userFormData, setUserFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    role: 'user',
   });
 
   const [isCreating, setIsCreating] = useState(false);
@@ -93,17 +104,33 @@ export default function AdminScreen() {
   };
 
   const handleEditClientAccount = (clientAccount: ClientAccount) => {
-    // TODO: Implement edit modal
-    Alert.alert('Fonctionnalité à venir', 'La modification des comptes clients sera bientôt disponible.');
+    setEditingClientAccount(clientAccount);
+    setFormData({
+      companyName: clientAccount.companyName,
+      siret: clientAccount.siret || '',
+      address: clientAccount.address || '',
+      city: clientAccount.city || '',
+      postalCode: clientAccount.postalCode || '',
+      country: clientAccount.country || '',
+      phone: clientAccount.phone || '',
+      contactEmail: clientAccount.contactEmail || '',
+    });
+    setIsEditModalVisible(true);
   };
 
   const handleDeleteClientAccount = (clientAccount: ClientAccount) => {
     setDeleteModal({ visible: true, clientAccount });
   };
 
-  const handleViewUsers = (clientAccount: ClientAccount) => {
-    // For now, just show an alert. Later we can implement user management
-    Alert.alert('Fonctionnalité à venir', 'La gestion des utilisateurs sera bientôt disponible.');
+  const handleAddUser = (clientAccount: ClientAccount) => {
+    setTargetClientAccount(clientAccount);
+    setUserFormData({
+      firstName: '',
+      lastName: '',
+      email: '',
+      role: 'user',
+    });
+    setIsAddUserModalVisible(true);
   };
 
   const confirmDelete = async () => {
@@ -141,6 +168,62 @@ export default function AdminScreen() {
       Alert.alert(t.common.success, t.admin.clientAccountCreated);
     } catch (error: any) {
       Alert.alert(t.common.error, error.message || t.admin.clientAccountCreated);
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  const handleUpdateClientAccount = async () => {
+    if (!formData.companyName.trim() || !editingClientAccount) {
+      Alert.alert(t.common.error, 'Le nom de l\'entreprise est requis.');
+      return;
+    }
+
+    try {
+      setIsCreating(true);
+      // TODO: Implement update mutation when available
+      // await updateMutation.mutateAsync({ id: editingClientAccount.id, ...formData });
+      setIsEditModalVisible(false);
+      setEditingClientAccount(null);
+      setFormData({
+        companyName: '',
+        siret: '',
+        address: '',
+        city: '',
+        postalCode: '',
+        country: '',
+        phone: '',
+        contactEmail: '',
+      });
+      Alert.alert(t.common.success, 'Compte client modifié avec succès.');
+    } catch (error: any) {
+      Alert.alert(t.common.error, error.message || 'Erreur lors de la modification du compte client.');
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  const handleAddUserSubmit = async () => {
+    if (!userFormData.firstName.trim() || !userFormData.lastName.trim() || !userFormData.email.trim() || !targetClientAccount) {
+      Alert.alert(t.common.error, 'Tous les champs sont requis.');
+      return;
+    }
+
+    try {
+      setIsCreating(true);
+      // TODO: Implement create user mutation when available
+      // await createUserMutation.mutateAsync({ ...userFormData, clientAccountId: targetClientAccount.id });
+      setIsAddUserModalVisible(false);
+      setTargetClientAccount(null);
+      setUserFormData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        role: 'user',
+      });
+      Alert.alert(t.common.success, 'Utilisateur ajouté avec succès.');
+    } catch (error: any) {
+      Alert.alert(t.common.error, error.message || 'Erreur lors de l\'ajout de l\'utilisateur.');
     } finally {
       setIsCreating(false);
     }
@@ -209,7 +292,7 @@ export default function AdminScreen() {
         onClientAccountPress={handleClientAccountPress}
         onEditClientAccount={handleEditClientAccount}
         onDeleteClientAccount={handleDeleteClientAccount}
-        onViewUsers={handleViewUsers}
+        onAddUser={handleAddUser}
       />
 
       {/* Create Client Account Modal */}
@@ -363,6 +446,330 @@ export default function AdminScreen() {
             >
               <Text style={[styles.submitButtonText, { color: '#FFFFFF' }]}>
                 {isCreating ? t.common.loading : t.common.add}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Edit Client Account Modal */}
+      <Modal
+        visible={isEditModalVisible}
+        animationType="slide"
+        presentationStyle="pageSheet"
+      >
+        <View style={[styles.modalContainer, { backgroundColor }]}>
+          <View style={styles.modalHeader}>
+            <Text style={[styles.modalTitle, { color: textColor }]}>
+              Modifier le compte client
+            </Text>
+            <TouchableOpacity onPress={() => {
+              setIsEditModalVisible(false);
+              setEditingClientAccount(null);
+              setFormData({
+                companyName: '',
+                siret: '',
+                address: '',
+                city: '',
+                postalCode: '',
+                country: '',
+                phone: '',
+                contactEmail: '',
+              });
+            }}>
+              <IconSymbol name="xmark" size={24} color={textColor} />
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView style={styles.modalContent} showsVerticalScrollIndicator={false}>
+            <View style={styles.formGroup}>
+              <Text style={[styles.label, { color: textColor }]}>
+                {t.admin.companyName} *
+              </Text>
+              <TextInput
+                style={[styles.input, { backgroundColor, borderColor: secondaryTextColor, color: textColor }]}
+                placeholder={t.admin.companyName}
+                placeholderTextColor={secondaryTextColor}
+                value={formData.companyName}
+                onChangeText={(text) => setFormData({ ...formData, companyName: text })}
+                editable={!isCreating}
+              />
+            </View>
+
+            <View style={styles.formGroup}>
+              <Text style={[styles.label, { color: textColor }]}>{t.admin.siret}</Text>
+              <TextInput
+                style={[styles.input, { backgroundColor, borderColor: secondaryTextColor, color: textColor }]}
+                placeholder={t.admin.siret}
+                placeholderTextColor={secondaryTextColor}
+                value={formData.siret}
+                onChangeText={(text) => setFormData({ ...formData, siret: text })}
+                editable={!isCreating}
+              />
+            </View>
+
+            <View style={styles.formGroup}>
+              <Text style={[styles.label, { color: textColor }]}>{t.admin.address}</Text>
+              <TextInput
+                style={[styles.input, styles.textArea, { backgroundColor, borderColor: secondaryTextColor, color: textColor }]}
+                placeholder={t.admin.address}
+                placeholderTextColor={secondaryTextColor}
+                value={formData.address}
+                onChangeText={(text) => setFormData({ ...formData, address: text })}
+                multiline
+                numberOfLines={3}
+                textAlignVertical="top"
+                editable={!isCreating}
+              />
+            </View>
+
+            <View style={styles.formGroup}>
+              <Text style={[styles.label, { color: textColor }]}>{t.admin.city}</Text>
+              <TextInput
+                style={[styles.input, { backgroundColor, borderColor: secondaryTextColor, color: textColor }]}
+                placeholder={t.admin.city}
+                placeholderTextColor={secondaryTextColor}
+                value={formData.city}
+                onChangeText={(text) => setFormData({ ...formData, city: text })}
+                editable={!isCreating}
+              />
+            </View>
+
+            <View style={styles.formGroup}>
+              <Text style={[styles.label, { color: textColor }]}>{t.admin.postalCode}</Text>
+              <TextInput
+                style={[styles.input, { backgroundColor, borderColor: secondaryTextColor, color: textColor }]}
+                placeholder={t.admin.postalCode}
+                placeholderTextColor={secondaryTextColor}
+                value={formData.postalCode}
+                onChangeText={(text) => setFormData({ ...formData, postalCode: text })}
+                editable={!isCreating}
+              />
+            </View>
+
+            <View style={styles.formGroup}>
+              <Text style={[styles.label, { color: textColor }]}>{t.admin.country}</Text>
+              <TextInput
+                style={[styles.input, { backgroundColor, borderColor: secondaryTextColor, color: textColor }]}
+                placeholder={t.admin.country}
+                placeholderTextColor={secondaryTextColor}
+                value={formData.country}
+                onChangeText={(text) => setFormData({ ...formData, country: text })}
+                editable={!isCreating}
+              />
+            </View>
+
+            <View style={styles.formGroup}>
+              <Text style={[styles.label, { color: textColor }]}>{t.admin.phone}</Text>
+              <TextInput
+                style={[styles.input, { backgroundColor, borderColor: secondaryTextColor, color: textColor }]}
+                placeholder={t.admin.phone}
+                placeholderTextColor={secondaryTextColor}
+                value={formData.phone}
+                onChangeText={(text) => setFormData({ ...formData, phone: text })}
+                editable={!isCreating}
+              />
+            </View>
+
+            <View style={styles.formGroup}>
+              <Text style={[styles.label, { color: textColor }]}>{t.admin.contactEmail}</Text>
+              <TextInput
+                style={[styles.input, { backgroundColor, borderColor: secondaryTextColor, color: textColor }]}
+                placeholder={t.admin.contactEmail}
+                placeholderTextColor={secondaryTextColor}
+                value={formData.contactEmail}
+                onChangeText={(text) => setFormData({ ...formData, contactEmail: text })}
+                keyboardType="email-address"
+                editable={!isCreating}
+              />
+            </View>
+          </ScrollView>
+
+          <View style={styles.modalButtons}>
+            <TouchableOpacity
+              style={[styles.modalButton, styles.cancelButton, { backgroundColor: borderColor }]}
+              onPress={() => {
+                setIsEditModalVisible(false);
+                setEditingClientAccount(null);
+                setFormData({
+                  companyName: '',
+                  siret: '',
+                  address: '',
+                  city: '',
+                  postalCode: '',
+                  country: '',
+                  phone: '',
+                  contactEmail: '',
+                });
+              }}
+              disabled={isCreating}
+              activeOpacity={0.8}
+            >
+              <Text style={[styles.cancelButtonText, { color: textColor }]}>
+                {t.common.cancel}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.modalButton, styles.submitButton, { backgroundColor: tintColor }, isCreating && styles.disabledButton]}
+              onPress={handleUpdateClientAccount}
+              disabled={isCreating}
+              activeOpacity={0.8}
+            >
+              <Text style={[styles.submitButtonText, { color: '#FFFFFF' }]}>
+                {isCreating ? t.common.loading : 'Modifier'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Add User Modal */}
+      <Modal
+        visible={isAddUserModalVisible}
+        animationType="slide"
+        presentationStyle="pageSheet"
+      >
+        <View style={[styles.modalContainer, { backgroundColor }]}>
+          <View style={styles.modalHeader}>
+            <Text style={[styles.modalTitle, { color: textColor }]}>
+              Ajouter un utilisateur
+            </Text>
+            <TouchableOpacity onPress={() => {
+              setIsAddUserModalVisible(false);
+              setTargetClientAccount(null);
+              setUserFormData({
+                firstName: '',
+                lastName: '',
+                email: '',
+                role: 'user',
+              });
+            }}>
+              <IconSymbol name="xmark" size={24} color={textColor} />
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView style={styles.modalContent} showsVerticalScrollIndicator={false}>
+            {targetClientAccount && (
+              <View style={styles.clientAccountInfo}>
+                <Text style={[styles.infoLabel, { color: secondaryTextColor }]}>
+                  Compte client :
+                </Text>
+                <Text style={[styles.infoValue, { color: textColor }]}>
+                  {targetClientAccount.companyName}
+                </Text>
+              </View>
+            )}
+
+            <View style={styles.formGroup}>
+              <Text style={[styles.label, { color: textColor }]}>
+                Prénom *
+              </Text>
+              <TextInput
+                style={[styles.input, { backgroundColor, borderColor: secondaryTextColor, color: textColor }]}
+                placeholder="Prénom"
+                placeholderTextColor={secondaryTextColor}
+                value={userFormData.firstName}
+                onChangeText={(text) => setUserFormData({ ...userFormData, firstName: text })}
+                editable={!isCreating}
+              />
+            </View>
+
+            <View style={styles.formGroup}>
+              <Text style={[styles.label, { color: textColor }]}>
+                Nom *
+              </Text>
+              <TextInput
+                style={[styles.input, { backgroundColor, borderColor: secondaryTextColor, color: textColor }]}
+                placeholder="Nom"
+                placeholderTextColor={secondaryTextColor}
+                value={userFormData.lastName}
+                onChangeText={(text) => setUserFormData({ ...userFormData, lastName: text })}
+                editable={!isCreating}
+              />
+            </View>
+
+            <View style={styles.formGroup}>
+              <Text style={[styles.label, { color: textColor }]}>
+                Email *
+              </Text>
+              <TextInput
+                style={[styles.input, { backgroundColor, borderColor: secondaryTextColor, color: textColor }]}
+                placeholder="Email"
+                placeholderTextColor={secondaryTextColor}
+                value={userFormData.email}
+                onChangeText={(text) => setUserFormData({ ...userFormData, email: text })}
+                keyboardType="email-address"
+                editable={!isCreating}
+              />
+            </View>
+
+            <View style={styles.formGroup}>
+              <Text style={[styles.label, { color: textColor }]}>
+                Rôle
+              </Text>
+              <View style={styles.roleContainer}>
+                <TouchableOpacity
+                  style={[
+                    styles.roleOption,
+                    { backgroundColor: userFormData.role === 'user' ? tintColor : borderColor }
+                  ]}
+                  onPress={() => setUserFormData({ ...userFormData, role: 'user' })}
+                  disabled={isCreating}
+                >
+                  <Text style={[
+                    styles.roleText,
+                    { color: userFormData.role === 'user' ? '#FFFFFF' : textColor }
+                  ]}>
+                    Utilisateur
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.roleOption,
+                    { backgroundColor: userFormData.role === 'admin' ? tintColor : borderColor }
+                  ]}
+                  onPress={() => setUserFormData({ ...userFormData, role: 'admin' })}
+                  disabled={isCreating}
+                >
+                  <Text style={[
+                    styles.roleText,
+                    { color: userFormData.role === 'admin' ? '#FFFFFF' : textColor }
+                  ]}>
+                    Administrateur
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </ScrollView>
+
+          <View style={styles.modalButtons}>
+            <TouchableOpacity
+              style={[styles.modalButton, styles.cancelButton, { backgroundColor: borderColor }]}
+              onPress={() => {
+                setIsAddUserModalVisible(false);
+                setTargetClientAccount(null);
+                setUserFormData({
+                  firstName: '',
+                  lastName: '',
+                  email: '',
+                  role: 'user',
+                });
+              }}
+              disabled={isCreating}
+              activeOpacity={0.8}
+            >
+              <Text style={[styles.cancelButtonText, { color: textColor }]}>
+                {t.common.cancel}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.modalButton, styles.submitButton, { backgroundColor: tintColor }, isCreating && styles.disabledButton]}
+              onPress={handleAddUserSubmit}
+              disabled={isCreating}
+              activeOpacity={0.8}
+            >
+              <Text style={[styles.submitButtonText, { color: '#FFFFFF' }]}>
+                {isCreating ? t.common.loading : 'Ajouter'}
               </Text>
             </TouchableOpacity>
           </View>
@@ -524,5 +931,36 @@ const styles = StyleSheet.create({
   },
   disabledButton: {
     opacity: 0.6,
+  },
+  clientAccountInfo: {
+    backgroundColor: 'rgba(126, 159, 120, 0.1)',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 20,
+  },
+  infoLabel: {
+    fontSize: 12,
+    fontWeight: '500',
+    marginBottom: 4,
+  },
+  infoValue: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  roleContainer: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  roleOption: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    borderWidth: 1,
+  },
+  roleText: {
+    fontSize: 14,
+    fontWeight: '600',
   },
 });

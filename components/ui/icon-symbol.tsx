@@ -21,7 +21,10 @@ const MAPPING = {
   'trash': 'delete',
   'arrow.clockwise': 'refresh',
   'gearshape.fill': 'settings',
-  'person': 'person'
+  'person': 'person',
+  'plus': 'add',
+  'pencil': 'edit',
+  'person.2': 'people'
 } as IconMapping;
 
 /**

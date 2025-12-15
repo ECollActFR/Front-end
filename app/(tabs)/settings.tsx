@@ -2,7 +2,8 @@ import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useThemeColor } from '@/hooks/use-theme-color';
-import { useSettings, useColorScheme, ThemePreference, Language } from '@/contexts/SettingsContext';
+import { useSettings, ThemePreference, Language } from '@/contexts/SettingsContext';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useTranslation } from '@/hooks/useTranslation';
 
 export default function SettingsScreen() {

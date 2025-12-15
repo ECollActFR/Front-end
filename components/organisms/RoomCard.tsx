@@ -39,7 +39,7 @@ export default function RoomCard({ room, onPress, index = 0 }: RoomCardProps) {
         </View>
 
         <View style={styles.footer}>
-          <AmenityList amenities={room.amenities} />
+          <AmenityList amenities={room.amenities || []} />
         </View>
       </View>
     </TouchableOpacity>

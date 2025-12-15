@@ -86,15 +86,4 @@ export function useSettings() {
     return context;
 }
 
-// Hook for getting the effective color scheme
-export function useColorScheme(): ColorSchemeName {
-    const systemColorScheme = useSystemColorScheme();
-    const { themePreference } = useSettings();
-
-    const colorScheme: ColorSchemeName =
-        themePreference === 'auto'
-            ? systemColorScheme ?? 'light'
-            : themePreference;
-
-    return colorScheme;
-}
+// Note: useColorScheme hook is moved to a separate file to avoid circular dependency

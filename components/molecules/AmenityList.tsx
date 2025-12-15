@@ -19,6 +19,11 @@ export default function AmenityList({ amenities }: AmenityListProps) {
   const secondaryTextColor = useThemeColor({}, 'icon');
   const tintColor = useThemeColor({}, 'tint');
 
+  // Vérification pour éviter l'erreur si amenities est undefined
+  if (!amenities || !Array.isArray(amenities)) {
+    return null;
+  }
+
   return (
     <View style={styles.container}>
       {amenities.map((amenity, index) => (

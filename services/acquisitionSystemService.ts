@@ -7,6 +7,10 @@ import { ENDPOINTS } from '@/constants/config';
 import {
   ApiAcquisitionSystem,
   ApiAcquisitionSystemConfig,
+  ApiNetworkConfig,
+  ApiSensor,
+  ApiSystemConfig,
+  ApiTask,
   AcquisitionSystem,
   AcquisitionSystemConfig,
   HydraCollection,
@@ -19,10 +23,10 @@ import {
  * @param roomIri - Room IRI like "/rooms/20"
  * @returns Room ID or null if invalid
  */
-function extractRoomId(roomIri: string | undefined): number | null {
+function extractRoomId(roomIri: string): number | null {
   if (!roomIri) return null;
-  const match = roomIri?.match(/\/rooms\/(\d+)/);
-  return match ? parseInt(match[1], 10) : null;
+  const match = roomIri && roomIri.match(/\/rooms\/(\d+)/);
+  return match && match[1] ? parseInt(match[1], 10) : null;
 }
 
 /**
@@ -32,8 +36,8 @@ function extractRoomId(roomIri: string | undefined): number | null {
  * @returns System status
  */
 function determineSystemStatus(
-  sensors: any[],
-  systemConfig?: { debug: boolean }
+  sensors: ApiSensor[],
+  systemConfig?: ApiSystemConfig
 ): 'active' | 'inactive' | 'error' {
   if (!sensors || sensors.length === 0) {
     return 'error';
@@ -66,16 +70,12 @@ function transformApiSystem(
   const roomId = extractRoomId(apiSystem.room);
 
   // If we have full config, calculate stats from it
-  const activeSensorsCount = apiConfig
-    ? apiConfig.sensors.filter(s => s.enabled).length
-    : 0;
+  const activeSensorsCount = apiConfig?.sensors?.filter(s => s.enabled).length ?? 0;
 
-  const enabledTasksCount = apiConfig
-    ? apiConfig.tasks.filter(t => t.enabled).length
-    : 0;
+  const enabledTasksCount = apiConfig?.tasks?.filter(t => t.enabled).length ?? 0;
 
   const systemStatus = apiConfig
-    ? determineSystemStatus(apiConfig.sensors, apiConfig.systemConfig)
+    ? determineSystemStatus(apiConfig.sensors || [], apiConfig.systemConfig)
     : 'inactive';
 
   return {
@@ -108,7 +108,7 @@ export const acquisitionSystemService = {
       }
 
       // Transform API systems to UI systems
-      const systems = response.member.map(transformApiSystem);
+      const systems = response.member.map((apiSystem: ApiAcquisitionSystem) => transformApiSystem(apiSystem, undefined));
 
       return systems;
     } catch (error) {
@@ -156,14 +156,14 @@ export const acquisitionSystemService = {
 
       // Filter systems: unassigned or assigned to the specified room
       const availableSystems = response.member.filter(apiSystem => {
-        const roomId = extractRoomId(apiSystem.room);
+  const roomId = extractRoomId(apiSystem.room || '');
         // Include if unassigned (roomId is null) or assigned to the specified room
         return roomId === null || roomId === excludeRoomId;
       });
 
       // Transform API systems to UI systems
-      const systems = availableSystems.map(apiSystem =>
-        transformApiSystem(apiSystem, apiSystem)
+      const systems = availableSystems.map((apiSystem: ApiAcquisitionSystem) =>
+        transformApiSystem(apiSystem)
       );
 
       return systems;
@@ -193,10 +193,24 @@ export const acquisitionSystemService = {
 
       const config: AcquisitionSystemConfig = {
         ...baseSystem,
-        networkConfig: response.networkConfig,
-        sensors: response.sensors,
-        tasks: response.tasks,
-        systemConfig: response.systemConfig,
+        networkConfig: response.networkConfig || {
+          id: 0,
+          wifiSsid: 'Non configuré',
+          ntpServer: 'Non configuré',
+          timezone: 'Non configuré',
+          gmtOffsetSec: 0,
+          daylightOffsetSec: 0,
+        },
+        sensors: response.sensors || [],
+        tasks: response.tasks || [],
+        systemConfig: response.systemConfig || {
+          id: 0,
+          debug: false,
+          bufferSize: 0,
+          deepSleepEnabled: false,
+          webServerEnabled: false,
+          webServerPort: 0,
+        },
       };
 
       return config;
@@ -227,10 +241,24 @@ export const acquisitionSystemService = {
 
       const config: AcquisitionSystemConfig = {
         ...baseSystem,
-        networkConfig: response.networkConfig,
-        sensors: response.sensors,
-        tasks: response.tasks,
-        systemConfig: response.systemConfig,
+        networkConfig: response.networkConfig || {
+          id: 0,
+          wifiSsid: 'Non configuré',
+          ntpServer: 'Non configuré',
+          timezone: 'Non configuré',
+          gmtOffsetSec: 0,
+          daylightOffsetSec: 0,
+        },
+        sensors: response.sensors || [],
+        tasks: response.tasks || [],
+        systemConfig: response.systemConfig || {
+          id: 0,
+          debug: false,
+          bufferSize: 0,
+          deepSleepEnabled: false,
+          webServerEnabled: false,
+          webServerPort: 0,
+        },
       };
 
       return config;

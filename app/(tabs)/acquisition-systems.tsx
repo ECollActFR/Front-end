@@ -1,4 +1,5 @@
-import { SearchBar } from '@/components/molecules';
+import { SearchBar, ErrorMessage } from '@/components/molecules';
+import { LoadingSpinner } from '@/components/atoms';
 import InfiniteList from '@/components/InfiniteList';
 import AcquisitionSystemCard from '@/components/organisms/AcquisitionSystemCard';
 import { useAcquisitionSystemsInfiniteQuery } from '@/hooks/queries/useAcquisitionSystemsInfiniteQuery';
@@ -63,8 +64,12 @@ export default function AcquisitionSystemsScreen() {
     router.push(`/acquisition-system/${systemId}`);
   };
 
-  const handleRefresh = () => {
-    refetch();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await refetch();
+    setIsRefreshing(false);
   };
 
   const renderSystem = ({ item, index }: { item: AcquisitionSystem; index: number }) => (

@@ -66,10 +66,10 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
     if (isLoading) return;
 
     // Routes protégées
-    const protectedRoutes = ['(tabs)', 'settings', 'index'];
+    const protectedRoutes = ['(tabs)', 'settings', 'index', 'acquisition-systems', 'admin', 'user'];
     const currentRoute = segments.join('/');
 
-    const isProtected = protectedRoutes.some((r) => currentRoute.startsWith(r));
+    const isProtected = protectedRoutes.some((r) => currentRoute.startsWith(r) || currentRoute.endsWith(r));
 
     console.log('AuthGuard: isProtected:', isProtected, 'currentRoute:', currentRoute);
 
@@ -79,7 +79,7 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
       console.log('AuthGuard: redirecting to sign-in (not authenticated)');
       router.replace('/sign-in');
     }
-  }, [segments, token, isLoading, isAuthenticated]);
+  }, [segments, token, isLoading, isAuthenticated, router]);
 
   if (isLoading) {
     return (

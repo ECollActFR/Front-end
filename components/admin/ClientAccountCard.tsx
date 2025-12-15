@@ -11,7 +11,7 @@ interface ClientAccountCardProps {
   onPress: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
-  onViewUsers?: () => void;
+  onAddUser?: () => void;
   index?: number;
 }
 
@@ -20,7 +20,7 @@ export default function ClientAccountCard({
   onPress,
   onEdit,
   onDelete,
-  onViewUsers,
+  onAddUser,
   index = 0,
 }: ClientAccountCardProps) {
   const cardGreen = useThemeColor({}, 'cardGreen');
@@ -103,13 +103,13 @@ export default function ClientAccountCard({
           </View>
           
           <View style={styles.actions}>
-            {onViewUsers && (
+            {onAddUser && (
               <TouchableOpacity
                 style={[styles.actionButton, { backgroundColor: tintColor }]}
-                onPress={onViewUsers}
+                onPress={onAddUser}
                 activeOpacity={0.7}
               >
-                <IconSymbol name="person.2" size={16} color="#FFFFFF" />
+                <IconSymbol name="plus" size={16} color="#FFFFFF" />
               </TouchableOpacity>
             )}
             {onEdit && (

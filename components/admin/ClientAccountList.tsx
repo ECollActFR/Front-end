@@ -15,7 +15,7 @@ interface ClientAccountListProps {
   onClientAccountPress: (clientAccount: ClientAccount) => void;
   onEditClientAccount?: (clientAccount: ClientAccount) => void;
   onDeleteClientAccount?: (clientAccount: ClientAccount) => void;
-  onViewUsers?: (clientAccount: ClientAccount) => void;
+  onAddUser?: (clientAccount: ClientAccount) => void;
 }
 
 export default function ClientAccountList({
@@ -30,7 +30,7 @@ export default function ClientAccountList({
   onClientAccountPress,
   onEditClientAccount,
   onDeleteClientAccount,
-  onViewUsers,
+  onAddUser,
 }: ClientAccountListProps) {
   const { t } = useTranslation();
 
@@ -41,7 +41,7 @@ export default function ClientAccountList({
       onPress={() => onClientAccountPress(item)}
       onEdit={onEditClientAccount ? () => onEditClientAccount(item) : undefined}
       onDelete={onDeleteClientAccount ? () => onDeleteClientAccount(item) : undefined}
-      onViewUsers={onViewUsers ? () => onViewUsers(item) : undefined}
+      onAddUser={onAddUser ? () => onAddUser(item) : undefined}
     />
   );
 

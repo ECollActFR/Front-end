@@ -1,4 +1,6 @@
-import { SearchBar } from '@/components/molecules';
+import { SearchBar, ErrorMessage } from '@/components/molecules';
+import { LoadingSpinner } from '@/components/atoms';
+import InfiniteList from '@/components/InfiniteList';
 import { RoomCard } from '@/components/organisms';
 import { useRoomsInfiniteQuery, useCreateRoomMutation } from '@/hooks/queries/useRoomsInfiniteQuery';
 import { Room } from '@/types/room';

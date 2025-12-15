@@ -4,7 +4,6 @@
 
 import React, { Component, ReactNode } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { useThemeColor } from '@/hooks/use-theme-color';
 import { logger } from '@/utils/logger';
 
 interface Props {
@@ -63,9 +62,10 @@ class ErrorBoundaryClass extends Component<Props, State> {
 
 // Functional component wrapper for hooks usage
 function ErrorFallback({ error, onRetry }: { error?: Error; onRetry: () => void }) {
-  const backgroundColor = useThemeColor({}, 'background');
-  const textColor = useThemeColor({}, 'text');
-  const borderColor = useThemeColor({}, 'border');
+  // Use static colors since ErrorBoundary is rendered outside SettingsProvider
+  const backgroundColor = '#ffffff';
+  const textColor = '#000000';
+  const borderColor = '#e5e5e5';
 
   return (
     <View style={[styles.container, { backgroundColor, borderColor }]}>

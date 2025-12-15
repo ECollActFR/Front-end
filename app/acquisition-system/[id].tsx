@@ -136,40 +136,43 @@ export default function AcquisitionSystemDetailScreen() {
           </View>
 
           {/* Network Configuration Section */}
-          <ConfigSection
-            title={t.acquisitionSystemDetail?.networkConfig || 'Configuration réseau'}
-            icon="wifi"
-            defaultOpen={true}
-          >
-            <ConfigRow
-              label={t.acquisitionSystemDetail?.wifiSsid || 'WiFi SSID'}
-              value={config.networkConfig.wifiSsid}
-            />
-            <ConfigRow
-              label={t.acquisitionSystemDetail?.ntpServer || 'Serveur NTP'}
-              value={config.networkConfig.ntpServer}
-            />
-            <ConfigRow
-              label={t.acquisitionSystemDetail?.timezone || 'Fuseau horaire'}
-              value={config.networkConfig.timezone}
-            />
-            <ConfigRow
-              label="Décalage GMT"
-              value={`${config.networkConfig.gmtOffsetSec}s`}
-            />
-            <ConfigRow
-              label="Décalage heure d'été"
-              value={`${config.networkConfig.daylightOffsetSec}s`}
-            />
-          </ConfigSection>
+          {config.networkConfig && (
+            <ConfigSection
+              title={t.acquisitionSystemDetail?.networkConfig || 'Configuration réseau'}
+              icon="wifi"
+              defaultOpen={true}
+            >
+              <ConfigRow
+                label={t.acquisitionSystemDetail?.wifiSsid || 'WiFi SSID'}
+                value={config.networkConfig.wifiSsid}
+              />
+              <ConfigRow
+                label={t.acquisitionSystemDetail?.ntpServer || 'Serveur NTP'}
+                value={config.networkConfig.ntpServer}
+              />
+              <ConfigRow
+                label={t.acquisitionSystemDetail?.timezone || 'Fuseau horaire'}
+                value={config.networkConfig.timezone}
+              />
+              <ConfigRow
+                label="Décalage GMT"
+                value={`${config.networkConfig.gmtOffsetSec}s`}
+              />
+              <ConfigRow
+                label="Décalage heure d'été"
+                value={`${config.networkConfig.daylightOffsetSec}s`}
+              />
+            </ConfigSection>
+          )}
 
           {/* Sensors Section */}
-          <ConfigSection
-            title={`${t.acquisitionSystemDetail?.sensors || 'Capteurs'} (${config.sensors.length})`}
-            icon="sensor.fill"
-            defaultOpen={false}
-          >
-            {config.sensors.map((sensor, index) => (
+          {config.sensors && (
+            <ConfigSection
+              title={`${t.acquisitionSystemDetail?.sensors || 'Capteurs'} (${config.sensors.length})`}
+              icon="sensor.fill"
+              defaultOpen={false}
+            >
+              {config.sensors.map((sensor, index) => (
               <View
                 key={sensor.id}
                 style={[
@@ -201,15 +204,17 @@ export default function AcquisitionSystemDetailScreen() {
                 )}
               </View>
             ))}
-          </ConfigSection>
+            </ConfigSection>
+          )}
 
           {/* Tasks Section */}
-          <ConfigSection
-            title={`${t.acquisitionSystemDetail?.tasks || 'Tâches'} (${config.tasks.length})`}
-            icon="list.bullet"
-            defaultOpen={false}
-          >
-            {config.tasks.map((task, index) => (
+          {config.tasks && (
+            <ConfigSection
+              title={`${t.acquisitionSystemDetail?.tasks || 'Tâches'} (${config.tasks.length})`}
+              icon="list.bullet"
+              defaultOpen={false}
+            >
+              {config.tasks.map((task, index) => (
               <View
                 key={task.id}
                 style={[
@@ -236,23 +241,26 @@ export default function AcquisitionSystemDetailScreen() {
                 )}
               </View>
             ))}
-          </ConfigSection>
+            </ConfigSection>
+          )}
 
           {/* System Configuration Section */}
-          <ConfigSection
-            title={t.acquisitionSystemDetail?.systemConfig || 'Configuration système'}
-            icon="server.rack"
-            defaultOpen={false}
-          >
-            <ConfigRow label="Mode debug" value={config.systemConfig.debug} />
-            <ConfigRow label="Taille du buffer" value={config.systemConfig.bufferSize} />
-            <ConfigRow label="Deep sleep" value={config.systemConfig.deepSleepEnabled} />
-            <ConfigRow label="Serveur web" value={config.systemConfig.webServerEnabled} />
-            <ConfigRow
-              label="Port serveur web"
-              value={config.systemConfig.webServerPort}
-            />
-          </ConfigSection>
+          {config.systemConfig && (
+            <ConfigSection
+              title={t.acquisitionSystemDetail?.systemConfig || 'Configuration système'}
+              icon="server.rack"
+              defaultOpen={false}
+            >
+              <ConfigRow label="Mode debug" value={config.systemConfig.debug} />
+              <ConfigRow label="Taille du buffer" value={config.systemConfig.bufferSize} />
+              <ConfigRow label="Deep sleep" value={config.systemConfig.deepSleepEnabled} />
+              <ConfigRow label="Serveur web" value={config.systemConfig.webServerEnabled} />
+              <ConfigRow
+                label="Port serveur web"
+                value={config.systemConfig.webServerPort}
+              />
+            </ConfigSection>
+          )}
         </View>
       </ScrollView>
 

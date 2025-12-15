@@ -22,6 +22,8 @@ interface InfiniteListProps<T> {
   showsVerticalScrollIndicator?: boolean;
   keyExtractor?: (item: T, index: number) => string;
   estimatedItemSize?: number;
+  numColumns?: number;
+  columnWrapperStyle?: any;
 }
 
 export default function InfiniteList<T>({
@@ -43,6 +45,8 @@ export default function InfiniteList<T>({
   showsVerticalScrollIndicator = false,
   keyExtractor,
   estimatedItemSize,
+  numColumns,
+  columnWrapperStyle,
 }: InfiniteListProps<T>) {
   const backgroundColor = useThemeColor({}, 'background');
   const textColor = useThemeColor({}, 'text');
@@ -123,6 +127,8 @@ export default function InfiniteList<T>({
       style={[styles.container, { backgroundColor }, style]}
       refreshing={isRefreshing}
       onRefresh={onRefresh}
+      numColumns={numColumns}
+      columnWrapperStyle={columnWrapperStyle}
       // Performance optimizations
       removeClippedSubviews={true}
       maxToRenderPerBatch={10}

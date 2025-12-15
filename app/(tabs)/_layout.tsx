@@ -1,5 +1,6 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
+import { Tabs , useRouter, useSegments } from 'expo-router';
+import React, { useEffect } from 'react';
+import { ActivityIndicator, View } from 'react-native';
 
 import { HapticTab } from '@/components/haptic-tab';
 import { IconSymbol } from '@/components/ui/icon-symbol';
@@ -7,18 +8,56 @@ import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useIsSuperAdmin } from '@/hooks/useRoleCheck';
+import { useAuth } from '@/contexts/AuthContext';
+// ---- Tabs AuthGuard ----
+function TabsAuthGuard({ children }: { children: React.ReactNode }) {
+  const { token, isLoading, isAuthenticated } = useAuth();
+  const router = useRouter();
+  const segments = useSegments();
+
+  useEffect(() => {
+    console.log('TabsAuthGuard: token:', token, 'isAuthenticated:', isAuthenticated, 'isLoading:', isLoading);
+    if (isLoading) return;
+
+    // Routes protégées dans les tabs
+    const protectedTabsRoutes = ['index', 'settings', 'acquisition-systems', 'admin', 'user'];
+    const currentSegment = segments[segments.length - 1]; // Get last segment
+
+    const isProtected = currentSegment ? protectedTabsRoutes.includes(currentSegment) : false;
+
+    console.log('TabsAuthGuard: isProtected:', isProtected, 'currentSegment:', currentSegment);
+
+    // Use isAuthenticated instead of just token for better security
+    if (isProtected && !isAuthenticated && currentSegment !== 'sign-in') {
+      console.log('TabsAuthGuard: redirecting to sign-in (not authenticated)');
+      router.replace('/sign-in');
+    }
+  }, [segments, token, isLoading, isAuthenticated, router]);
+
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
+  return <>{children}</>;
+}
+
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const { t } = useTranslation();
   const isSuperAdmin = useIsSuperAdmin();
 
   return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-      }}>
+    <TabsAuthGuard>
+      <Tabs
+        screenOptions={{
+          tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+          headerShown: false,
+          tabBarButton: HapticTab,
+        }}>
       <Tabs.Screen
         name="index"
         options={{
@@ -56,6 +95,7 @@ export default function TabLayout() {
           }}
         />
       )}
-    </Tabs>
+      </Tabs>
+    </TabsAuthGuard>
   );
 }
