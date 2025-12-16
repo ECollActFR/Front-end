@@ -136,8 +136,30 @@ export interface RoomUpdatePayload {
   name: string;
   description: string;
   captureTypes: string[];
-  acquisitionSystem?: string; // IRI of the acquisition system or null/undefined
+  acquisitionSystem?: string; // IRI of acquisition system or null/undefined
+  buildingId?: number; // ID of building (e.g. 1, not /buildings/1)
 }
+
+// Room from API (includes building IRI)
+export interface ApiRoomWithBuilding extends ApiRoom {
+  building?: string; // IRI of building (e.g. /buildings/1)
+}
+
+// Utility functions for building IRI/ID conversion
+export const buildingUtils = {
+  // Extract numeric ID from building IRI
+  extractId: (buildingIri?: string): number | undefined => {
+    if (!buildingIri) return undefined;
+    const match = buildingIri.match(/\/buildings\/(\d+)/);
+    return match ? parseInt(match[1]) : undefined;
+  },
+  
+  // Create IRI from numeric ID
+  createIri: (buildingId?: number): string | undefined => {
+    if (!buildingId) return undefined;
+    return `/buildings/${buildingId}`;
+  }
+};
 
 // API Room with Capture Types (for editing)
 export interface ApiRoomWithCaptureTypes {

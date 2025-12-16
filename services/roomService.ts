@@ -279,6 +279,11 @@ export const roomService = {
    */
   async updateRoom(roomId: number, payload: RoomUpdatePayload): Promise<ApiRoom> {
     try {
+      console.log('🔥 updateRoom - RAW PAYLOAD RECEIVED:', JSON.stringify(payload, null, 2));
+      
+      // Send payload as-is with buildingId (no transformation)
+      console.log('🚀 updateRoom - SENDING PAYLOAD TO API:', JSON.stringify(payload, null, 2));
+
       const response = await apiClient.put<ApiRoom>(ENDPOINTS.ROOM_UPDATE(roomId), payload);
 
       if (!response) {
@@ -309,6 +314,11 @@ export const roomService = {
    */
   async createRoom(payload: RoomUpdatePayload): Promise<ApiRoom> {
     try {
+      console.log('🔥 createRoom - RAW PAYLOAD RECEIVED:', JSON.stringify(payload, null, 2));
+      
+      // Send payload as-is with buildingId (no transformation)
+      console.log('🚀 createRoom - SENDING PAYLOAD TO API:', JSON.stringify(payload, null, 2));
+
       const response = await apiClient.post<ApiRoom>(ENDPOINTS.ROOM_CREATE, payload);
 
       if (!response) {
@@ -317,7 +327,7 @@ export const roomService = {
 
       return response;
     } catch (error) {
-      console.error('Error creating room:', error);
+      console.error('❌ Error creating room:', error);
       throw error;
     }
   },

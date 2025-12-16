@@ -57,7 +57,7 @@ const DarkNavigationTheme = {
 
 // ---- AuthGuard ----
 function AuthGuard({ children }: { children: React.ReactNode }) {
-  const { token, isLoading, isAuthenticated } = useAuth();
+  const { token, isLoading, isAuthenticated, logout } = useAuth();
   const router = useRouter();
   const segments = useSegments();
 
@@ -75,11 +75,26 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
 
     // Use isAuthenticated instead of just token for better security
     // Also don't redirect if we're already on sign-in page
+    // This effect will trigger on auth state changes (including after 401 token clearing)
     if (isProtected && !isAuthenticated && currentRoute !== 'sign-in') {
       console.log('AuthGuard: redirecting to sign-in (not authenticated)');
       router.replace('/sign-in');
     }
   }, [segments, token, isLoading, isAuthenticated, router]);
+
+  // Listen for 401 events and handle auth state update
+  useEffect(() => {
+    const handle401 = () => {
+      console.log('AuthGuard: Received 401 event, updating auth state and redirecting');
+      logout();
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('auth:401', handle401);
+      return () => window.removeEventListener('auth:401', handle401);
+    }
+    return undefined;
+  }, [logout]);
 
   if (isLoading) {
     return (
@@ -99,12 +114,14 @@ function RootLayoutContent() {
   return (
     <SafeAreaProvider>
       <ThemeProvider value={colorScheme === 'dark' ? DarkNavigationTheme : LightNavigationTheme}>
-        <Stack>
-          {/* Routes */}
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="room/[id]" options={{ headerShown: false }} />
-          <Stack.Screen name="sign-in" options={{ headerShown: false }} />
-        </Stack>
+        <AuthGuard>
+          <Stack>
+            {/* Routes */}
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="room/[id]" options={{ headerShown: false }} />
+            <Stack.Screen name="sign-in" options={{ headerShown: false }} />
+          </Stack>
+        </AuthGuard>
         <StatusBar style="auto" />
       </ThemeProvider>
     </SafeAreaProvider>

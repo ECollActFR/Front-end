@@ -77,11 +77,15 @@ export class ApiClient {
           config: authConfig,
         };
         
-        // Handle 401 errors - clear token and let calling code handle redirect
+        // Handle 401 errors - clear token and trigger auth state update
         if (response.status === 401) {
           // Clear token on 401 errors
           try {
             await tokenManager.clearToken();
+            // Emit custom event to notify AuthContext of 401
+            if (typeof window !== 'undefined') {
+              window.dispatchEvent(new CustomEvent('auth:401'));
+            }
           } catch (clearError) {
             // Log but don't fail the request error handling
             console.warn('Failed to clear token after 401:', clearError);

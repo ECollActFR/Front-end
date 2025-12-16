@@ -3,7 +3,8 @@ import { View, Text, StyleSheet, Modal, TextInput, TouchableOpacity, ScrollView,
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { roomService } from '@/services/roomService';
 import { acquisitionSystemService } from '@/services/acquisitionSystemService';
-import { ApiCaptureType } from '@/types/room';
+import { buildingService, ApiBuilding } from '@/services/buildingService';
+import { ApiCaptureType, buildingUtils } from '@/types/room';
 import { AcquisitionSystem } from '@/types/acquisitionSystem';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -28,6 +29,8 @@ export default function RoomEditModal({ visible, roomId, onClose, onSave }: Room
 
   const [selectedAcquisitionSystem, setSelectedAcquisitionSystem] = useState<string>('');
   const [currentAcquisitionSystem, setCurrentAcquisitionSystem] = useState<AcquisitionSystem | null>(null);
+  const [selectedBuildingId, setSelectedBuildingId] = useState<number | undefined>(undefined);
+  const [buildings, setBuildings] = useState<ApiBuilding[]>([]);
   const [showSystemSelector, setShowSystemSelector] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -51,10 +54,11 @@ export default function RoomEditModal({ visible, roomId, onClose, onSave }: Room
     try {
       setLoading(true);
       console.log('RoomEditModal - Loading data for roomId:', roomId);
-      const [roomData, captureTypesData, acquisitionSystemsData] = await Promise.all([
+      const [roomData, captureTypesData, acquisitionSystemsData, buildingsData] = await Promise.all([
         roomService.getRoom(roomId),
         roomService.getCaptureTypes(),
         acquisitionSystemService.getAcquisitionSystems(),
+        buildingService.getBuildings(),
       ]);
       console.log('RoomEditModal - Room data received:', roomData);
       console.log('RoomEditModal - Full roomData structure:', JSON.stringify(roomData, null, 2));
@@ -78,6 +82,11 @@ export default function RoomEditModal({ visible, roomId, onClose, onSave }: Room
       
       setSelectedCaptureTypes(selectedCaptureTypeIds);
       setCaptureTypes(captureTypesData);
+      setBuildings(buildingsData);
+      
+      // Extract building ID from room data
+      const buildingId = buildingUtils.extractId((roomData as any).building);
+      setSelectedBuildingId(buildingId);
       
       // Set current acquisition system if available
       let currentSystemIri = '';
@@ -158,6 +167,7 @@ export default function RoomEditModal({ visible, roomId, onClose, onSave }: Room
         description,
         captureTypes: captureTypeIris,
         acquisitionSystem: selectedAcquisitionSystem || undefined,
+        buildingId: selectedBuildingId,
       });
       onSave();
       onClose();
@@ -217,6 +227,45 @@ export default function RoomEditModal({ visible, roomId, onClose, onSave }: Room
                 multiline
                 numberOfLines={4}
               />
+            </View>
+
+            <View style={styles.formGroup}>
+              <Text style={[styles.label, { color: textColor }]}>Bâtiment</Text>
+              <ScrollView style={[styles.buildingList, { backgroundColor, borderColor: secondaryTextColor }]}>
+                {buildings.map(building => {
+                  const isSelected = selectedBuildingId === building.id;
+                  return (
+                    <TouchableOpacity
+                      key={building.id}
+                      style={[
+                        styles.buildingOption,
+                        { backgroundColor: isSelected ? tintColor : backgroundColor, borderColor: secondaryTextColor }
+                      ]}
+                      onPress={() => setSelectedBuildingId(building.id)}
+                    >
+                      <Text style={[
+                        styles.buildingName,
+                        { color: isSelected ? backgroundColor : textColor }
+                      ]}>
+                        {building.name}
+                      </Text>
+                      <Text style={[
+                        styles.buildingAddress,
+                        { color: isSelected ? backgroundColor : secondaryTextColor }
+                      ]}>
+                        {building.address && `${building.address}, `}
+                        {building.city && `${building.city} `}
+                        {building.postalCode}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+                {buildings.length === 0 && (
+                  <Text style={[styles.noBuildings, { color: secondaryTextColor }]}>
+                    Aucun bâtiment disponible
+                  </Text>
+                )}
+              </ScrollView>
             </View>
 
             <View style={styles.formGroup}>
@@ -365,5 +414,30 @@ const styles = StyleSheet.create({
   },
   checkboxDescription: {
     fontSize: 14,
+  },
+  buildingList: {
+    borderRadius: 8,
+    borderWidth: 1,
+    maxHeight: 200,
+  },
+  buildingOption: {
+    padding: 12,
+    borderBottomWidth: 1,
+    borderRadius: 8,
+    marginBottom: 4,
+  },
+  buildingName: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 2,
+  },
+  buildingAddress: {
+    fontSize: 14,
+  },
+  noBuildings: {
+    fontSize: 14,
+    fontStyle: 'italic',
+    textAlign: 'center',
+    padding: 20,
   },
 });

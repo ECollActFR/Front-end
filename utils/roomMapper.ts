@@ -9,6 +9,8 @@ const mapEquipmentToAmenities = (equipment: Equipment[]): Amenity[] => {
   const amenities: Amenity[] = [];
 
   equipment.forEach(item => {
+    if (!item || !item.name) return;
+    
     const lowerName = item.name.toLowerCase();
 
     if (lowerName.includes('wifi')) {
@@ -67,8 +69,8 @@ const isRoomAvailable = (name: string): boolean => {
  * Transform API room to UI room
  */
 export function mapApiRoomToRoom(apiRoom: ApiRoom, index: number): Room {
-  // Map equipment from API
-  const equipment: Equipment[] = apiRoom.equipment?.map(eq => ({
+  // Map equipment from API with validation
+  const equipment: Equipment[] = apiRoom.equipment?.filter(eq => eq && eq.name).map(eq => ({
     id: eq.id,
     name: eq.name,
     capacity: eq.capacity,
