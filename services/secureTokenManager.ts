@@ -5,30 +5,50 @@
 
 import * as SecureStore from 'expo-secure-store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
 
 // Storage keys
 const TOKEN_KEY = 'auth_token';
 const MIGRATION_KEY = 'token_migrated_to_secure';
 
 // Web fallback for SecureStore
-const isWeb = typeof window !== 'undefined' && window.location?.hostname;
+const isWeb = Platform.OS === 'web';
+
+// Check if localStorage is available (for SSR compatibility)
+const isLocalStorageAvailable = (): boolean => {
+  return isWeb && typeof window !== 'undefined' && 'localStorage' in window;
+};
 
 const secureStorage = {
   setItemAsync: async (key: string, value: string): Promise<void> => {
-    if (isWeb) {
-      return AsyncStorage.setItem(key, value);
+    if (isLocalStorageAvailable()) {
+      try {
+        window.localStorage.setItem(key, value);
+      } catch (error) {
+        throw new TokenStorageError('Failed to store item in localStorage', error as Error);
+      }
+      return;
     }
     return SecureStore.setItemAsync(key, value);
   },
   getItemAsync: async (key: string): Promise<string | null> => {
-    if (isWeb) {
-      return AsyncStorage.getItem(key);
+    if (isLocalStorageAvailable()) {
+      try {
+        return window.localStorage.getItem(key);
+      } catch (error) {
+        throw new TokenStorageError('Failed to retrieve item from localStorage', error as Error);
+      }
     }
     return SecureStore.getItemAsync(key);
   },
   deleteItemAsync: async (key: string): Promise<void> => {
-    if (isWeb) {
-      return AsyncStorage.removeItem(key);
+    if (isLocalStorageAvailable()) {
+      try {
+        window.localStorage.removeItem(key);
+      } catch (error) {
+        throw new TokenStorageError('Failed to remove item from localStorage', error as Error);
+      }
+      return;
     }
     return SecureStore.deleteItemAsync(key);
   }
@@ -120,14 +140,16 @@ function isTokenExpiringSoon(token: string): boolean {
  */
 async function migrateFromAsyncStorage(): Promise<void> {
   try {
+    // Skip migration on web - use AsyncStorage directly
+    if (isWeb) {
+      return;
+    }
+
     // Check if migration already done
     const alreadyMigrated = await secureStorage.getItemAsync(MIGRATION_KEY);
     if (alreadyMigrated === 'true') {
       return;
     }
-
-    // Import AsyncStorage dynamically
-    const AsyncStorage = require('@react-native-async-storage/async-storage').default;
     
     // Get token from AsyncStorage
     const oldToken = await AsyncStorage.getItem('auth-token');
@@ -135,7 +157,7 @@ async function migrateFromAsyncStorage(): Promise<void> {
     if (oldToken) {
       // Validate token before migration
       if (!isTokenExpired(oldToken)) {
-        // Store in SecureStore
+        // Store in secure storage
         await secureStorage.setItemAsync(TOKEN_KEY, oldToken);
       }
       

@@ -3,7 +3,7 @@ import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ActivityIndicator, Platform, View } from 'react-native';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -60,10 +60,11 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
   const { token, isLoading, isAuthenticated, logout } = useAuth();
   const router = useRouter();
   const segments = useSegments();
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   useEffect(() => {
     console.log('AuthGuard: token:', token, 'isAuthenticated:', isAuthenticated, 'isLoading:', isLoading);
-    if (isLoading) return;
+    if (isLoading || isRedirecting) return;
 
     // Routes protégées
     const protectedRoutes = ['(tabs)', 'settings', 'index', 'acquisition-systems', 'admin', 'user'];
@@ -78,9 +79,12 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
     // This effect will trigger on auth state changes (including after 401 token clearing)
     if (isProtected && !isAuthenticated && currentRoute !== 'sign-in') {
       console.log('AuthGuard: redirecting to sign-in (not authenticated)');
+      setIsRedirecting(true);
       router.replace('/sign-in');
+      // Reset redirect flag after a short delay to prevent multiple redirects
+      setTimeout(() => setIsRedirecting(false), 1000);
     }
-  }, [segments, token, isLoading, isAuthenticated, router]);
+  }, [segments, token, isLoading, isAuthenticated, router, isRedirecting]);
 
   // Listen for 401 events and handle auth state update
   useEffect(() => {

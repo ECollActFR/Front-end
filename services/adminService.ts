@@ -11,6 +11,7 @@ import {
   ClientAccountUpdatePayload, 
   HydraCollectionClientAccount,
   CreateUserPayload,
+  CreateUserApiPayload,
   UpdateUserPayload,
   UserWithClientAccount
 } from '@/types/clientAccount';
@@ -44,6 +45,10 @@ export const adminService = {
   },
 
   async createUser(payload: CreateUserPayload): Promise<UserWithClientAccount> {
+    return apiClient.post(ENDPOINTS.USERS, payload);
+  },
+
+  async createUserApi(payload: CreateUserApiPayload): Promise<UserWithClientAccount> {
     return apiClient.post(ENDPOINTS.USERS, payload);
   },
 

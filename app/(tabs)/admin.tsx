@@ -5,9 +5,11 @@ import { useIsSuperAdmin } from '@/hooks/useRoleCheck';
 import { 
   useClientAccountsInfiniteQuery, 
   useCreateClientAccountMutation, 
-  useDeleteClientAccountMutation 
+  useDeleteClientAccountMutation,
+  useCreateUserApiMutation
 } from '@/hooks/queries/useClientAccountsQuery';
 import { ClientAccount } from '@/types/clientAccount';
+import { imagePickerService } from '@/services/imagePickerService';
 import { useState } from 'react';
 import {
   StyleSheet,
@@ -19,6 +21,7 @@ import {
   Modal,
   TextInput,
   ScrollView,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useThemeColor } from '@/hooks/use-theme-color';
@@ -54,6 +57,8 @@ export default function AdminScreen() {
     firstName: '',
     lastName: '',
     email: '',
+    phone: '',
+    profilePictureUrl: '',
     role: 'user',
   });
 
@@ -71,6 +76,7 @@ export default function AdminScreen() {
 
   const createMutation = useCreateClientAccountMutation();
   const deleteMutation = useDeleteClientAccountMutation();
+  const createUserMutation = useCreateUserApiMutation();
 
   const backgroundColor = useThemeColor({}, 'background');
   const textColor = useThemeColor({}, 'text');
@@ -80,6 +86,45 @@ export default function AdminScreen() {
   const cardBlue = useThemeColor({}, 'cardBlue');
 
   const { t } = useTranslation();
+
+  // Validation functions
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const validatePhone = (phone: string): boolean => {
+    const phoneRegex = /^[\d\s\+\-\(\)]+$/;
+    return phone === '' || phoneRegex.test(phone);
+  };
+
+  // Image picker functions
+  const handleImagePicker = async () => {
+    try {
+      const result = await imagePickerService.pickImage({
+        quality: 0.8,
+        maxWidth: 400,
+        maxHeight: 400,
+        includeBase64: false,
+      });
+
+      if (result && result.uri) {
+        setUserFormData({ 
+          ...userFormData, 
+          profilePictureUrl: result.uri 
+        });
+      }
+    } catch (error: any) {
+      Alert.alert('Erreur', 'Impossible de sélectionner une image: ' + error.message);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setUserFormData({ 
+      ...userFormData, 
+      profilePictureUrl: '' 
+    });
+  };
 
   // Redirect non-super admins
   if (!isSuperAdmin) {
@@ -128,6 +173,8 @@ export default function AdminScreen() {
       firstName: '',
       lastName: '',
       email: '',
+      phone: '',
+      profilePictureUrl: '',
       role: 'user',
     });
     setIsAddUserModalVisible(true);
@@ -205,20 +252,44 @@ export default function AdminScreen() {
 
   const handleAddUserSubmit = async () => {
     if (!userFormData.firstName.trim() || !userFormData.lastName.trim() || !userFormData.email.trim() || !targetClientAccount) {
-      Alert.alert(t.common.error, 'Tous les champs sont requis.');
+      Alert.alert(t.common.error, 'Les champs Prénom, Nom et Email sont requis.');
+      return;
+    }
+
+    if (!validateEmail(userFormData.email)) {
+      Alert.alert(t.common.error, 'Veuillez entrer une adresse email valide.');
+      return;
+    }
+
+    if (!validatePhone(userFormData.phone)) {
+      Alert.alert(t.common.error, 'Veuillez entrer un numéro de téléphone valide.');
       return;
     }
 
     try {
       setIsCreating(true);
-      // TODO: Implement create user mutation when available
-      // await createUserMutation.mutateAsync({ ...userFormData, clientAccountId: targetClientAccount.id });
+      
+      // Map form data to API payload
+      const apiPayload = {
+        email: userFormData.email,
+        firstname: userFormData.firstName,
+        lastname: userFormData.lastName,
+        phone: userFormData.phone || undefined,
+        profilePictureUrl: userFormData.profilePictureUrl || undefined,
+        roles: userFormData.role === 'admin' ? ['ROLE_ADMIN'] : ['ROLE_USER'],
+        clientAccountId: targetClientAccount.id,
+      };
+
+      await createUserMutation.mutateAsync(apiPayload);
+      
       setIsAddUserModalVisible(false);
       setTargetClientAccount(null);
       setUserFormData({
         firstName: '',
         lastName: '',
         email: '',
+        phone: '',
+        profilePictureUrl: '',
         role: 'user',
       });
       Alert.alert(t.common.success, 'Utilisateur ajouté avec succès.');
@@ -641,6 +712,8 @@ export default function AdminScreen() {
                 firstName: '',
                 lastName: '',
                 email: '',
+                phone: '',
+                profilePictureUrl: '',
                 role: 'user',
               });
             }}>
@@ -705,6 +778,50 @@ export default function AdminScreen() {
 
             <View style={styles.formGroup}>
               <Text style={[styles.label, { color: textColor }]}>
+                Téléphone
+              </Text>
+              <TextInput
+                style={[styles.input, { backgroundColor, borderColor: secondaryTextColor, color: textColor }]}
+                placeholder="Téléphone"
+                placeholderTextColor={secondaryTextColor}
+                value={userFormData.phone}
+                onChangeText={(text) => setUserFormData({ ...userFormData, phone: text })}
+                keyboardType="phone-pad"
+                editable={!isCreating}
+              />
+            </View>
+
+            <View style={styles.formGroup}>
+              <Text style={[styles.label, { color: textColor }]}>
+                Photo de profil
+              </Text>
+              <View style={styles.imageUploadContainer}>
+                {userFormData.profilePictureUrl ? (
+                  <View style={styles.imagePreview}>
+                    <Image source={{ uri: userFormData.profilePictureUrl }} style={styles.profileImage} />
+                    <TouchableOpacity
+                      style={[styles.removeImageButton, { backgroundColor: '#dc3545' }]}
+                      onPress={handleRemoveImage}
+                    >
+                      <Text style={styles.removeImageText}>Supprimer</Text>
+                    </TouchableOpacity>
+                  </View>
+                ) : (
+                  <TouchableOpacity
+                    style={[styles.uploadButton, { borderColor }]}
+                    onPress={handleImagePicker}
+                  >
+                    <IconSymbol name="photo.badge.plus" size={24} color={secondaryTextColor} />
+                    <Text style={[styles.uploadText, { color: secondaryTextColor }]}>
+                      Ajouter une photo
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            </View>
+
+            <View style={styles.formGroup}>
+              <Text style={[styles.label, { color: textColor }]}>
                 Rôle
               </Text>
               <View style={styles.roleContainer}>
@@ -752,6 +869,8 @@ export default function AdminScreen() {
                   firstName: '',
                   lastName: '',
                   email: '',
+                  phone: '',
+                  profilePictureUrl: '',
                   role: 'user',
                 });
               }}
@@ -962,5 +1081,39 @@ const styles = StyleSheet.create({
   roleText: {
     fontSize: 14,
     fontWeight: '600',
+  },
+  imageUploadContainer: {
+    marginVertical: 8,
+  },
+  imagePreview: {
+    alignItems: 'center',
+    gap: 12,
+  },
+  profileImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+  },
+  removeImageButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 6,
+  },
+  removeImageText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  uploadButton: {
+    borderWidth: 2,
+    borderStyle: 'dashed',
+    borderRadius: 8,
+    padding: 24,
+    alignItems: 'center',
+    gap: 8,
+  },
+  uploadText: {
+    fontSize: 14,
+    marginTop: 4,
   },
 });

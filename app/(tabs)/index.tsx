@@ -6,6 +6,7 @@ import { useRoomsInfiniteQuery, useCreateRoomMutation } from '@/hooks/queries/us
 import { Room } from '@/types/room';
 import { useRouter } from 'expo-router';
 import React, { useMemo, useState, useEffect } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 import { StyleSheet, Text, useWindowDimensions, View, Modal, TextInput, TouchableOpacity, Alert, ScrollView, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useThemeColor } from '@/hooks/use-theme-color';
@@ -26,6 +27,7 @@ const DESKTOP_BREAKPOINT = 768;
 
 export default function HomeScreen() {
   const router = useRouter();
+  const { isAuthenticated } = useAuth();
   const { 
     data: rooms, 
     isLoading, 
@@ -34,7 +36,7 @@ export default function HomeScreen() {
     fetchNextPage,
     refetch,
     error 
-  } = useRoomsInfiniteQuery();
+  } = useRoomsInfiniteQuery(isAuthenticated);
   const createMutation = useCreateRoomMutation();
   
   const [searchTerm, setSearchTerm] = useState('');
@@ -274,6 +276,7 @@ export default function HomeScreen() {
 
       {/* Rooms List */}
       <InfiniteList
+        key={`rooms-list-${numColumns}`}
         data={filteredRooms}
         isLoading={isLoading}
         isFetchingNextPage={isFetchingNextPage}

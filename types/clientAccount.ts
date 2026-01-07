@@ -70,6 +70,17 @@ export interface CreateUserPayload {
   roles: string[]; // ["ROLE_USER"]
 }
 
+// New API payload format for localhost:8000/users
+export interface CreateUserApiPayload {
+  email: string;
+  firstname: string;
+  lastname: string;
+  phone?: string;
+  profilePictureUrl?: string;
+  roles: string[]; // ["ROLE_USER"] par défaut
+  clientAccountId: number;
+}
+
 export interface UpdateUserPayload {
   username?: string;
   email?: string;

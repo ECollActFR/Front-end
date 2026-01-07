@@ -7,7 +7,9 @@ import { adminService } from '@/services/adminService';
 import { 
   ClientAccount, 
   ClientAccountCreatePayload, 
-  ClientAccountUpdatePayload
+  ClientAccountUpdatePayload,
+  CreateUserApiPayload,
+  UserWithClientAccount
 } from '@/types/clientAccount';
 
 // Query keys for client accounts
@@ -96,5 +98,16 @@ export function useDeleteClientAccountMutation() {
     invalidateQueries: [clientAccountKeys.list()],
     removeQueries: [clientAccountKeys.detail(0)], // Will be replaced with actual id
     context: 'useDeleteClientAccountMutation',
+  });
+}
+
+/**
+ * Hook to create a new user via API
+ */
+export function useCreateUserApiMutation() {
+  return useCreateMutation<UserWithClientAccount, CreateUserApiPayload>({
+    mutationFn: adminService.createUserApi,
+    invalidateQueries: [clientAccountKeys.list()],
+    context: 'useCreateUserApiMutation',
   });
 }

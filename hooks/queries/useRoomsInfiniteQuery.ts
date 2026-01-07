@@ -4,7 +4,7 @@
 
 import { useInfiniteList, useCreateMutation, useUpdateMutation, useDeleteMutation } from '@/hooks/useInfiniteList';
 import { roomService } from '@/services/roomService';
-import { Room, RoomUpdatePayload, HydraCollection } from '@/types/room';
+import { Room, RoomUpdatePayload, HydraCollection as RoomHydraCollection, ApiRoom } from '@/types/room';
 
 // Query keys for rooms
 export const roomKeys = {
@@ -17,13 +17,14 @@ export const roomKeys = {
 /**
  * Hook for infinite list of rooms using reusable system
  */
-export function useRoomsInfiniteQuery() {
+export function useRoomsInfiniteQuery(isAuthenticated: boolean) {
   return useInfiniteList<Room>({
     queryKey: roomKeys.list(),
-    fetchFunction: roomService.getRoomsPaginated,
+    fetchFunction: (page: number, limit: number) => roomService.getRoomsPaginated(page, limit) as any,
     limit: 20,
     staleTime: 2 * 60 * 1000, // 2 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
+    enabled: isAuthenticated, // Only fetch when authenticated
   });
 }
 
@@ -31,7 +32,7 @@ export function useRoomsInfiniteQuery() {
  * Hook to create a new room using reusable system
  */
 export function useCreateRoomMutation() {
-  return useCreateMutation<Room, RoomUpdatePayload>({
+  return useCreateMutation<ApiRoom, RoomUpdatePayload>({
     mutationFn: roomService.createRoom,
     invalidateQueries: [roomKeys.list()],
     context: 'useCreateRoomMutation',
@@ -42,13 +43,13 @@ export function useCreateRoomMutation() {
  * Hook to update a room using reusable system
  */
 export function useUpdateRoomMutation() {
-  return useUpdateMutation<Room, { id: number; payload: RoomUpdatePayload }>({
+  return useUpdateMutation<ApiRoom, { id: number; payload: RoomUpdatePayload }>({
     mutationFn: ({ id, payload }) => roomService.updateRoom(id, payload),
     invalidateQueries: [roomKeys.list()],
     updateQueries: [
       {
         queryKey: roomKeys.detail(0), // Will be replaced with actual id
-        data: {} as Room, // Will be replaced with actual data
+        data: {} as ApiRoom, // Will be replaced with actual data
       },
     ],
     context: 'useUpdateRoomMutation',

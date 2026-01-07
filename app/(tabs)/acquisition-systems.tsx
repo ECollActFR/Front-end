@@ -174,6 +174,7 @@ export default function AcquisitionSystemsScreen() {
 
       {/* Systems List */}
       <InfiniteList
+        key={`systems-list-${numColumns}`}
         data={filteredSystems}
         isLoading={isLoading}
         isFetchingNextPage={isFetchingNextPage}
